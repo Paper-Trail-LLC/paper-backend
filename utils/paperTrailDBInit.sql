@@ -24,6 +24,7 @@ CREATE TABLE `user` (
   `gender` varchar(45) DEFAULT NULL,
   `hash` varchar(45) NOT NULL,
   `salt` varchar(45) NOT NULL,
+  `geolocation` point NOT NULL,
   `created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -72,6 +73,7 @@ CREATE TABLE `user_book` (
   `status` varchar(45) DEFAULT NULL,
   `lending` tinyint NOT NULL DEFAULT '0',
   `selling` tinyint NOT NULL DEFAULT '0',
+  `geolocation` point DEFAULT NULL,
   `created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -144,7 +146,11 @@ CREATE TABLE `book_petition` (
   `location_radius` int DEFAULT NULL,
   `expiration_date` datetime NOT NULL,
   `created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `book_id_petition_idx` (`book_id`),
+  KEY `user_id_petition_idx` (`user_id`),
+  CONSTRAINT `book_id_petition` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`),
+  CONSTRAINT `user_id_petition` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Book offer --------------------------------------------------------
@@ -164,4 +170,21 @@ CREATE TABLE `offer` (
   KEY `user_book_idx` (`user_book_id`),
   CONSTRAINT `petition` FOREIGN KEY (`book_petition_id`) REFERENCES `book_petition` (`id`),
   CONSTRAINT `user_book_offered` FOREIGN KEY (`user_book_id`) REFERENCES `user_book` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table structure for table `borrowing_agreement`-----------------------
+DROP TABLE IF EXISTS `borrowing_agreement`;
+CREATE TABLE `borrowing_agreement` (
+  `id` varbinary(16) NOT NULL,
+  `user_book_id` varbinary(16) NOT NULL,
+  `user_id` varbinary(16) NOT NULL,
+  `status` varchar(45) DEFAULT NULL,
+  `return_date` datetime NOT NULL,
+  `created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id_borrowing_idx` (`user_id`),
+  KEY `book_id_borrowing_idx` (`user_book_id`),
+  CONSTRAINT `user_book_id_borrowing` FOREIGN KEY (`user_book_id`) REFERENCES `user_book` (`id`),
+  CONSTRAINT `user_id_borrowing` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
