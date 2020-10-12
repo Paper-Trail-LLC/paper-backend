@@ -1,7 +1,6 @@
 import myPool from "../../helpers/mysql.pool"
 import {PoolConnection} from "mysql"
-import axios from "axios"
-import Book from "../../models/book"
+import {Book} from "../../models/book"
 import ExternalAPI from "../../helpers/external.api.client"
 
 export class BooksController {
@@ -16,7 +15,7 @@ export class BooksController {
             const response: any = await ExternalAPI.get('/book/'+isbn)
             const book: any = response.data.book
             const result = new Book(book.title, book.authors, book.isbn, book.date_published, book.edition, book.image)
-            return book
+            return result
         } catch(error) {
             if(error.response.status == 404){
                 return null

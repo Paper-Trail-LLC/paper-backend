@@ -1,5 +1,5 @@
 // WIP
-class Book {
+export class Book {
     title: string
     authors: string[]
     isbn: string
@@ -17,5 +17,3 @@ class Book {
     }
     
 }
-
-export default Book

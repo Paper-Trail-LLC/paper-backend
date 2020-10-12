@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import Book from "../../models/book";
+import {Book} from "../../models/book";
 import {BooksController} from "./books.controller"
 /**
  * Router Definition
