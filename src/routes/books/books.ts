@@ -46,7 +46,7 @@ booksRouter.get('/search', async (req: Request, res: Response): Promise<void> =>
 
         if(!keywords || !page || !limit){
             res.status(400).json({
-                message: "Query parameters 'query', 'page', 'limit' are required."
+                message: "Query parameters 'keywords', 'page', 'limit' are required."
             })
             return
         }

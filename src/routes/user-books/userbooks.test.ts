@@ -1,7 +1,7 @@
-// import {UserBooksController} from './userbooks.controller'
+import {UserBooksController} from './userbooks.controller'
 import myPool from '../../helpers/mysql.pool'
 
-// const userBooksController = new UserBooksController()
+const userBooksController = new UserBooksController()
 
 describe('userbook routes tests', () => {
     describe('userbook search enpoint', () => {
@@ -11,8 +11,7 @@ describe('userbook routes tests', () => {
 
 describe('UserBooksController tests', () => {
     describe('searchUserBooks', () => {
-
-        beforeEach(async () => {
+        beforeAll(async () => {
             return new Promise<any> ((resolve, reject) => {
                 myPool.query({
                     sql: `set @a = uuid_to_bin(uuid()); set @b = uuid_to_bin(uuid()); set @c = uuid_to_bin(uuid()); set @d = uuid_to_bin(uuid()); set @e = uuid_to_bin(uuid());
@@ -82,7 +81,7 @@ describe('UserBooksController tests', () => {
             })
         })
 
-        afterEach(async () => {
+        afterAll(async () => {
             return new Promise<any>((resolve, reject) => {
                 myPool.query({
                     sql: `delete from user_book; delete from book; delete from user;`
@@ -90,6 +89,7 @@ describe('UserBooksController tests', () => {
                     if(error){
                         reject(error.message)
                     } else {
+                        myPool.end()
                         resolve(true)
                     }
                 })
@@ -97,17 +97,34 @@ describe('UserBooksController tests', () => {
         })
 
         it('should return the correct number of results', async () => {
-            // const result = await userBooksController.searchUserBooks('9780316605106', [10,10], 1000)
-            
+            const result = await userBooksController.searchUserBooks('9780316605106')
+            expect(result).toHaveLength(2)
         })
 
-        // it('should return results within the correct distance', () => {
+        it('should return results within the correct distance', () => {
 
-        // })
+        })
 
-        // it('should return only results for the given isbn', () => {
+        it('should return results marked as available', () => {
 
-        // })
+        })
+
+        it('should return lending exclusive books', async () => {
+
+        })
+
+        it('should return selling exclusive books', async () => {
+
+        })
+
+        it('should return only results for the given isbn', async () => {
+            const result = await userBooksController.searchUserBooks('9781410425362')
+            expect(result).toHaveLength(3)
+            result.forEach(value => {
+                console.log(value)
+                expect(value.isbn).toBe('9781410425362')
+            })
+        })
 
     })
 })

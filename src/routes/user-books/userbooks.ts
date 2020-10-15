@@ -52,7 +52,7 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
             })
         }
 
-        const userBook = await userBooksController.searchUserBooks(isbn, status, lending, selling, [lat, lon], distance, limit, page)
+        const userBook = await userBooksController.searchUserBooks(isbn, [lat, lon], distance, status, lending, selling, limit, page)
         res.json({
             data: userBook
         });
