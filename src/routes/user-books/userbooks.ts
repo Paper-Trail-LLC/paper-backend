@@ -1,6 +1,6 @@
+import { Book } from "../../models/book";
 import express, { Request, Response } from "express";
 import {UserBooksController} from './userbooks.controller'
-import {UserBook} from '../../models/userbook'
 /**
  * Router Definition
  */
@@ -50,12 +50,12 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
             res.status(400).json({
                 error: "Query parameters 'lat' and 'lon' are required when 'distance' is used."
             })
+        } else {
+            const userBook = await userBooksController.searchUserBooks(isbn, [lat, lon], distance, status, lending, selling, limit, page)
+            res.json({
+                data: userBook
+            });
         }
-
-        const userBook = await userBooksController.searchUserBooks(isbn, [lat, lon], distance, status, lending, selling, limit, page)
-        res.json({
-            data: userBook
-        });
 
     } catch(error){
         res.status(500).json({
@@ -64,3 +64,96 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
     }
     
 });
+
+userBooksRouter.get('/library/:userId', async (req: Request, res: Response): Promise<void> => {
+    try{
+        const userId = req.params.userId
+        const limit: number = +(req.query.limit as string)
+        const page: number = +(req.query.page as string)
+
+        if(!limit || !page){
+            res.status(400).json({
+                error: "Query parameters 'limit', 'page' is required."
+            })
+        } else {
+            const userBooks = await userBooksController.getLibraryOfUser(userId, limit, page)
+            res.status(200).json({
+                data: userBooks
+            })
+        }
+
+    } catch(error){
+        res.status(500).json({
+            error: error.message
+        })
+    }
+});
+
+userBooksRouter.post('/library/:userId', async (req: Request, res: Response): Promise<void> => {
+    try{
+        const userId: string = req.params.userId
+        const status: string = req.body.status
+        const lending: number = req.body.lending
+        const selling: number = req.body.selling
+        const lat: number = req.body.lat
+        const lon: number = req.body.lon
+        const isbn13: string = req.body.isbn13
+
+        if(!status || ! lending || !selling || !lat || !lon || !isbn13){
+            res.status(400).json({
+                error: 'Missing parameters in body. userId, status, lending, selling, lat, lon and isbn13 are required.'
+            })
+        } else {
+            const userBookId = await userBooksController.addBookToLibrary(userId, status, lending, selling, [lat, lon], isbn13)
+            res.status(201).json({
+                data: {
+                    success: true,
+                    userBookId: userBookId
+                }
+            })
+        }
+    } catch (error){
+        res.status(500).json({
+            error: error.message
+        })
+    }
+})
+
+userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Response): Promise<void> => {
+    try{
+        const userId: string = req.params.userId
+        const status: string = req.body.status
+        const lending: number = req.body.lending
+        const selling: number = req.body.selling
+        const lat: number = req.body.lat
+        const lon: number = req.body.lon
+        const isbn13: string = req.body.isbn13
+
+        const title: string = req.body.title
+        const authors: string[] = req.body.authors
+        const isbn: string = req.body.isbn
+        const releaseDate: Date = new Date(req.body.releaseDate)
+        const edition: string = req.body.edition
+        const coverURI: string = req.body.coverURI
+
+
+        if(!status || ! lending || !selling || !lat || !lon || !isbn13 || !title || !authors || !isbn || !releaseDate || !edition || !coverURI){
+            res.status(400).json({
+                error: 'Missing parameters in body. userId, status, lending, selling, lat, lon and isbn13 are required.'
+            })
+        } else {
+            const book = new Book(title, authors, isbn, isbn13, releaseDate, edition, coverURI)
+            const userBookId = await userBooksController.addCustomBookToLibrary(book, userId, status, lending, selling, [lat, lon])
+            res.status(201).json({
+                data: {
+                    success: true,
+                    userBookId: userBookId
+                }
+            })
+        }
+    } catch (error){
+        res.status(500).json({
+            error: error.message
+        })
+    }
+})

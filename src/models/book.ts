@@ -4,14 +4,16 @@ export class Book {
     title: string
     authors: string[]
     isbn: string
+    isbn13: string 
     releaseDate: Date
     edition: string
     coverURI: string
 
-    constructor(title: string, authors: string[], isbn: string, releaseDate: Date, edition: string, coverURI: string, bookId?: string){
+    constructor(title: string, authors: string[], isbn: string, isbn13: string, releaseDate: Date, edition: string, coverURI: string, bookId?: string){
         this.title = title
         this.authors = authors
         this.isbn = isbn
+        this.isbn13 = isbn13
         this.releaseDate = releaseDate
         this.edition = edition
         this.coverURI = coverURI

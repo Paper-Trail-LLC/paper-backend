@@ -9,8 +9,8 @@ export class UserBook extends Book {
     geolocation: [number, number]
     images?: Array<string>
 
-    constructor(userBookId: string, userId: string, bookId: string, title: string, authors: string[], isbn: string, releaseDate: Date, edition: string, coverURI: string, status: string, selling: number, lending: number, geolocation: [number, number], images?: Array<string>){
-        super(title, authors, isbn, releaseDate, edition, coverURI, bookId)
+    constructor(userBookId: string, userId: string, bookId: string, title: string, authors: string[], isbn: string, isbn13: string, releaseDate: Date, edition: string, coverURI: string, status: string, selling: number, lending: number, geolocation: [number, number], images?: Array<string>){
+        super(title, authors, isbn, isbn13, releaseDate, edition, coverURI, bookId)
         this.userBookId = userBookId
         this.userId = userId
         this.status = status
