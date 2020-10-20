@@ -20,9 +20,9 @@ export class UserBooksController {
             inner join book on user_book.book_id=book.id 
             where ${isbn.length === 13 ? `isbn13`:`isbn`} = ? 
             ${status ? `and status = ? `:``}
-            ${lending ? `and lending = ? `:``}
-            ${selling ? `and selling = ? `:``}
-            ${geolocation && distance ? `and ST_Distance(Point(?,?), geolocation) <= ? `:``}
+            ${lending != undefined ? `and lending = ? `:``}
+            ${selling != undefined? `and selling = ? `:``}
+            ${geolocation && distance != undefined ? `and ST_Distance(Point(?, ?), geolocation) <= ? `:``}
             limit ?
             offset ?; 
             select firstname, lastname from author 
@@ -33,9 +33,9 @@ export class UserBooksController {
             let v = []
             v.push(isbn)
             if(status) v.push(status)
-            if(lending) v.push(lending)
-            if(selling) v.push(selling)
-            if(geolocation && distance){
+            if(lending != undefined) v.push(lending)
+            if(selling != undefined) v.push(selling)
+            if(geolocation && distance != undefined){
                 v.push(geolocation[0])
                 v.push(geolocation[1])
                 v.push(distance)
@@ -69,7 +69,7 @@ export class UserBooksController {
                             value['status'], 
                             value['selling'], 
                             value['lending'], 
-                            [value['geolocation'].y, value['geolocation'].x])
+                            [value['geolocation'].x, value['geolocation'].y])
                     })
     
                     resolve(userBooks)

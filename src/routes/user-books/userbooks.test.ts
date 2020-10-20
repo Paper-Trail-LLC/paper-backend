@@ -71,11 +71,11 @@ describe('UserBooksController tests', () => {
                     (@d, ?, ?, ?, ?, ?, ST_GeomFromText('Point(? ?)')),
                     (@e, ?, ?, ?, ?, ?, ST_GeomFromText('Point(? ?)')); 
                     select @a, @b, @c, @d, @e;`,
-                    values: [ids.userIds[0]['@a'], ids.bookIds[0]['@a'], 'available', 1, 0, 10, 10,
-                            ids.userIds[0]['@a'], ids.bookIds[0]['@b'], 'unavailable', 1, 1, 10, 10,
-                            ids.userIds[0]['@b'], ids.bookIds[0]['@b'], 'available', 0, 1, 10, 10,
-                            ids.userIds[0]['@a'], ids.bookIds[0]['@b'], 'unavailable', 0, 0, 10, 10,
-                            ids.userIds[0]['@c'], ids.bookIds[0]['@a'], 'available', 1, 0, 10, 10]
+                    values: [ids.userIds[0]['@a'], ids.bookIds[0]['@a'], 'available', 1, 0, -65.926772, 18.376310, 
+                            ids.userIds[0]['@a'], ids.bookIds[0]['@b'], 'unavailable', 1, 1, -65.899706, 18.374507,
+                            ids.userIds[0]['@b'], ids.bookIds[0]['@b'], 'available', 0, 1, -65.958450, 18.377507,
+                            ids.userIds[0]['@a'], ids.bookIds[0]['@b'], 'unavailable', 0, 0, -65.846012, 18.404668,
+                            ids.userIds[0]['@c'], ids.bookIds[0]['@a'], 'available', 1, 0, -65.931912, 18.373311]
                 }, (error, results) => {
                     if(error){
                         reject(error.message)
@@ -123,20 +123,46 @@ describe('UserBooksController tests', () => {
             expect(result2).toHaveLength(1)
         })
 
-        it('should return results within the correct distance', () => {
-
+        it('should return results within the correct distance', async () => {
+            const result = await userBooksController.searchUserBooks('9780316605106', [-65.925475, 18.370511], 0)
+            expect(result).toHaveLength(0)
         })
 
-        it('should return results marked as available', () => {
-
+        it('should return results marked as available', async () => {
+            const result1 = await userBooksController.searchUserBooks('9780316605106', undefined, undefined, 'available')
+            result1.forEach(value => {
+                expect(value.status).toEqual('available')
+            })
+            const result2 = await userBooksController.searchUserBooks('9781410425362', undefined, undefined, 'available')
+            result2.forEach(value => {
+                expect(value.status).toEqual('available')
+            })
         })
 
         it('should return lending exclusive books', async () => {
-
+            const result1 = await userBooksController.searchUserBooks('9780316605106', undefined, undefined, undefined, 1, 0)
+            result1.forEach(value => {
+                expect(value.selling).toEqual(0)
+                expect(value.lending).toEqual(1)
+            })
+            const result2 = await userBooksController.searchUserBooks('9781410425362', undefined, undefined, undefined, 1, 0)
+            result2.forEach(value => {
+                expect(value.selling).toEqual(0)
+                expect(value.lending).toEqual(1)
+            })
         })
 
         it('should return selling exclusive books', async () => {
-
+            const result1 = await userBooksController.searchUserBooks('9780316605106', undefined, undefined, undefined, 0, 1)
+            result1.forEach(value => {
+                expect(value.selling).toEqual(1)
+                expect(value.lending).toEqual(0)
+            })
+            const result2 = await userBooksController.searchUserBooks('9781410425362', undefined, undefined, undefined, 0, 1)
+            result2.forEach(value => {
+                expect(value.selling).toEqual(1)
+                expect(value.lending).toEqual(0)
+            })
         })
 
         it('should return only results for the given isbn', async () => {
@@ -158,10 +184,17 @@ describe('UserBooksController tests', () => {
                 })
             }
         })
+
+        it('should return no more results than the limit', async () => {
+            for(let id in userIds){
+                const results = await userBooksController.getLibraryOfUser(id, 1)
+                expect(results.length).toBeLessThanOrEqual(1)
+            }
+        })
     })
 
     describe('addBookToLibrary', () => {
-        it('should insert userBook', async () => {
+        it('should insert userBook', async (done) => {
             const userBookId = await userBooksController.addBookToLibrary(userIds[0], 'available', 1, 1, [1.83, 2.44], '9780440240730')
             myPool.query({
                 sql: `select * from user_book where id = ?;`,
@@ -169,7 +202,16 @@ describe('UserBooksController tests', () => {
             }, (error, results) => {
                 expect(!error).toBeTruthy()
                 expect(results[0]['id']).toEqual(userBookId)
+                done()
             })
+        })
+
+        it('should throw error on invalid user id', async () => {
+            try{
+                await userBooksController.addBookToLibrary('7727rf2fh923h', 'available', 1, 1, [1.83, 2.44], '9780440240730')
+            } catch(error){
+                expect(error).toBeTruthy()
+            }
         })
     })
 })

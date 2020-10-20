@@ -51,7 +51,7 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
                 error: "Query parameters 'lat' and 'lon' are required when 'distance' is used."
             })
         } else {
-            const userBook = await userBooksController.searchUserBooks(isbn, [lat, lon], distance, status, lending, selling, limit, page)
+            const userBook = await userBooksController.searchUserBooks(isbn, [lon, lat], distance, status, lending, selling, limit, page)
             res.json({
                 data: userBook
             });
@@ -104,7 +104,7 @@ userBooksRouter.post('/library/:userId', async (req: Request, res: Response): Pr
                 error: 'Missing parameters in body. userId, status, lending, selling, lat, lon and isbn13 are required.'
             })
         } else {
-            const userBookId = await userBooksController.addBookToLibrary(userId, status, lending, selling, [lat, lon], isbn13)
+            const userBookId = await userBooksController.addBookToLibrary(userId, status, lending, selling, [lon, lat], isbn13)
             res.status(201).json({
                 data: {
                     success: true,
@@ -143,7 +143,7 @@ userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Respon
             })
         } else {
             const book = new Book(title, authors, isbn, isbn13, releaseDate, edition, coverURI)
-            const userBookId = await userBooksController.addCustomBookToLibrary(book, userId, status, lending, selling, [lat, lon])
+            const userBookId = await userBooksController.addCustomBookToLibrary(book, userId, status, lending, selling, [lon, lat])
             res.status(201).json({
                 data: {
                     success: true,
