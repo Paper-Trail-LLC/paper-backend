@@ -1,5 +1,6 @@
 import { homeRouter } from "./home/home"
 import { booksRouter } from "./books/books"
+import { userBooksRouter } from "./user-books/userbooks"
 import express from "express"
 
 /**
@@ -8,4 +9,5 @@ import express from "express"
 export function routesInit(app: express.Application): void {
     app.use("/", homeRouter);
     app.use("/books", booksRouter)
+    app.use("/userbooks", userBooksRouter)
 };

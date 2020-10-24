@@ -1,13 +1,12 @@
-import myPool from "../../helpers/mysql.pool"
-import {PoolConnection} from "mysql"
-import axios from "axios"
-import Book from "../../models/book"
+import {Book} from "../../models/book"
 import ExternalAPI from "../../helpers/external.api.client"
+import myPool from "../../helpers/mysql.pool"
+import { Pool, PoolConnection } from "mysql"
 
 export class BooksController {
-    public async getAllBooks(limit: number = 25, page: number = 0): Promise<Book[]> {
-        return [];
-    }
+    // public async getAllBooks(limit: number = 25, page: number = 0): Promise<Book[]> {
+    //     return [];
+    // }
     public async getBookByISBN(isbn: string): Promise<Book|null> {
         try{
             //TODO First search in local DB
@@ -15,8 +14,8 @@ export class BooksController {
             //If not found, search in external api
             const response: any = await ExternalAPI.get('/book/'+isbn)
             const book: any = response.data.book
-            const result = new Book(book.title, book.authors, book.isbn, book.date_published, book.edition, book.image)
-            return book
+            const result = new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
+            return result
         } catch(error) {
             if(error.response.status == 404){
                 return null
@@ -34,7 +33,7 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.date_published, book.edition, book.image)
+                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
             })
             return result
         } catch(error) {
@@ -55,7 +54,7 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.date_published, book.edition, book.image)
+                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
             })
             return result
         } catch(error) {
@@ -76,7 +75,7 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.date_published, book.edition, book.image)
+                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
             })
             return result
         } catch(error) {
@@ -85,5 +84,60 @@ export class BooksController {
             }
             throw new Error(error.message)
         }
+    }
+
+    public async insertBook(book: Book, connection?: PoolConnection): Promise<string> {
+        return new Promise((resolve, reject) => {
+            let p: Pool | PoolConnection = connection ? connection:myPool
+            let insertBookQuery = `set @bookId = uuid_to_bin(uuid()); 
+            insert into book (id, title, isbn13, release_date, edition, image_url, isbn) values(@bookId, ?, ?, ?, ?, ?, ?); 
+            select @bookId;`
+            p.query({
+                sql: insertBookQuery,
+                values: [book.title, book.isbn13, new Date(book.releaseDate), book.edition, book.coverURI, book.isbn]
+            }, (error, results) => {
+                if(error){
+                    reject(error)
+                } else {
+                    resolve(results[2][0]['@bookId'])
+                }
+            })
+        })
+    }
+
+    public async addAuthorToBook(authorId: string, bookId: string, connection?: PoolConnection): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            let p: Pool | PoolConnection = connection ? connection:myPool
+            let addBookAuthorQuery = `insert into book_author (book_id, author_id) values (?, ?)`
+            p.query({
+                sql: addBookAuthorQuery,
+                values: [bookId, authorId]
+            }, (error) => {
+                if(error){
+                    reject(error)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
+    }
+
+    public async insertAuthor(firstName: string, lastName: string, connection?: PoolConnection): Promise<string> {
+        return new Promise((resolve, reject) => {
+            let p: Pool | PoolConnection = connection ? connection:myPool
+            let addBookAuthorQuery = `set @id = uuid_to_bin(uuid()); 
+            insert into author (id, firstname, lastname) values (@id, ?, ?); 
+            select @id;`
+            p.query({
+                sql: addBookAuthorQuery,
+                values: [firstName, lastName]
+            }, (error, results) => {
+                if(error){
+                    reject(error)
+                } else {
+                    resolve(results[2][0]['@id'])
+                }
+            })
+        })
     }
 }

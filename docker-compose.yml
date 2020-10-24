@@ -12,7 +12,7 @@ services:
             - "3306:3306"
         volumes:
             - ./utils/paperTrailDBInit.sql:/docker-entrypoint-initdb.d/AppDatabase.sql
-        
+
     web:
         build:
             context: .
@@ -27,5 +27,5 @@ services:
             - PORT=3000
             - db_database=papertrail_dev
             - db_host=mysql
-            - db_passwrod=secretpassword
+            - db_password=secretpassword
             - db_user=dev_user

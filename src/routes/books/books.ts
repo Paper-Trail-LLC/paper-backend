@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import Book from "../../models/book";
+import {Book} from "../../models/book";
 import {BooksController} from "./books.controller"
 /**
  * Router Definition
@@ -46,7 +46,7 @@ booksRouter.get('/search', async (req: Request, res: Response): Promise<void> =>
 
         if(!keywords || !page || !limit){
             res.status(400).json({
-                message: "Query parameters 'query', 'page', 'limit' are required."
+                message: "Query parameters 'keywords', 'page', 'limit' are required."
             })
             return
         }
