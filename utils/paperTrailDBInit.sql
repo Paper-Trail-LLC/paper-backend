@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS `book`;
 CREATE TABLE `book` (
   `id` varbinary(16) NOT NULL,
   `title` tinytext NOT NULL,
+  `synopsys` text DEFAULT NULL,
   `isbn` varchar(10) DEFAULT NULL,
   `isbn13` varchar(13) NOT NULL,
   `release_date` date DEFAULT NULL,
@@ -34,8 +35,7 @@ CREATE TABLE `user` (
 DROP TABLE IF EXISTS `author`;
 CREATE TABLE `author` (
   `id` varbinary(16) NOT NULL,
-  `firstname` varchar(50) NOT NULL,
-  `lastname` varchar(100) NOT NULL,
+  `name` varchar(150) NOT NULL,
   PRIMARY KEY (`id`)
 );
 
