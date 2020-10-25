@@ -9,7 +9,7 @@ set @u1 = uuid_to_bin(uuid()); set @u2 = uuid_to_bin(uuid()); set @u3 = uuid_to_
 
 -- Insert books
 set @b1 = uuid_to_bin(uuid()); set @b2 = uuid_to_bin(uuid()); set @b3 = uuid_to_bin(uuid()); set @b4 = uuid_to_bin(uuid()); set @b5 = uuid_to_bin(uuid()); 
-                    insert into book (id, title, isbn13, release_date, editon) values 
+                    insert into book (id, title, isbn13, release_date, edition) values 
                     (@b1, 'Cirque du Freak: A Living Nightmare', '9780316605106', '2004-2-22', 'First Edition'),
                     (@b2, 'The Red Pyramid (The Kane Chronicles, Book 1)', '9781410425362', '2012-6-15', 'Third Edition'),
                     (@b3, 'Trials of Apollo 1 Hidden Oracle BAM Exclusive', '9781484784983', '2016-8-01', 'B&N First Edition'),
@@ -18,9 +18,9 @@ set @b1 = uuid_to_bin(uuid()); set @b2 = uuid_to_bin(uuid()); set @b3 = uuid_to_
 
 -- Insert authors
 set @a1 = uuid_to_bin(uuid()); set @a2 = uuid_to_bin(uuid()); 
-            insert into author (id, firstname, lastname) values 
-            (@a1, 'Darren', 'Shan'),
-            (@a2, 'Rick', 'Riordan');
+            insert into author (id, name) values 
+            (@a1, 'Darren Shan'),
+            (@a2, 'Rick Riordan');
 
 -- Insert book_author
 insert into book_author (book_id, author_id) values (@b1, @a1), (@b2, @a2), (@b3, @a2), (@b4, @a2), (@b5, @a2);
