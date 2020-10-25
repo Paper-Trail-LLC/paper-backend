@@ -14,7 +14,7 @@ export class BooksController {
             //If not found, search in external api
             const response: any = await ExternalAPI.get('/book/'+isbn)
             const book: any = response.data.book
-            const result = new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
+            const result = new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, book.synopsys)
             return result
         } catch(error) {
             if(error.response.status == 404){
@@ -33,7 +33,7 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
+                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, book.synopsys)
             })
             return result
         } catch(error) {
@@ -54,7 +54,7 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
+                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, book.synopsys)
             })
             return result
         } catch(error) {
@@ -75,7 +75,7 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image)
+                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, book.synopsys)
             })
             return result
         } catch(error) {
@@ -94,7 +94,7 @@ export class BooksController {
             select @bookId;`
             p.query({
                 sql: insertBookQuery,
-                values: [book.title, book.isbn13, new Date(book.releaseDate), book.edition, book.coverURI, book.isbn]
+                values: [book.title, book.isbn13, new Date(book.releaseDate), book.edition, book.coverURI, book.isbn, book.synopsys]
             }, (error, results) => {
                 if(error){
                     reject(error)
@@ -122,15 +122,15 @@ export class BooksController {
         })
     }
 
-    public async insertAuthor(firstName: string, lastName: string, connection?: PoolConnection): Promise<string> {
+    public async insertAuthor(name: string, connection?: PoolConnection): Promise<string> {
         return new Promise((resolve, reject) => {
             let p: Pool | PoolConnection = connection ? connection:myPool
             let addBookAuthorQuery = `set @id = uuid_to_bin(uuid()); 
-            insert into author (id, firstname, lastname) values (@id, ?, ?); 
+            insert into author (id, name) values (@id, ?); 
             select @id;`
             p.query({
                 sql: addBookAuthorQuery,
-                values: [firstName, lastName]
+                values: [name]
             }, (error, results) => {
                 if(error){
                     reject(error)

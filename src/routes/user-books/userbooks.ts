@@ -135,6 +135,7 @@ userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Respon
         const releaseDate: Date = new Date(req.body.releaseDate)
         const edition: string = req.body.edition
         const coverURI: string = req.body.coverURI
+        const synopsys: string = req.body.synopsys
 
 
         if(!status || ! lending || !selling || !lat || !lon || !isbn13 || !title || !authors || !isbn || !releaseDate || !edition || !coverURI){
@@ -142,7 +143,7 @@ userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Respon
                 error: 'Missing parameters in body. userId, status, lending, selling, lat, lon and isbn13 are required.'
             })
         } else {
-            const book = new Book(title, authors, isbn, isbn13, releaseDate, edition, coverURI)
+            const book = new Book(title, authors, isbn, isbn13, releaseDate, edition, coverURI, undefined, synopsys)
             const userBookId = await userBooksController.addCustomBookToLibrary(book, userId, status, lending, selling, [lon, lat])
             res.status(201).json({
                 data: {

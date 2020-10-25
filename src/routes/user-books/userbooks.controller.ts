@@ -25,7 +25,7 @@ export class UserBooksController {
             ${geolocation && distance != undefined ? `and ST_Distance(Point(?, ?), geolocation) <= ? `:``}
             limit ?
             offset ?; 
-            select firstname, lastname from author 
+            select name from author 
             inner join book_author on book_author.author_id = author.id 
             inner join book on book_author.book_id = book.id
             where ${isbn.length === 13 ? `book.isbn13`:`book.isbn`} = ?;`
@@ -52,7 +52,7 @@ export class UserBooksController {
                     reject(error)
                 } else {
                     const authors = results[1].map<string>((value) => {
-                        return `${value['firstname']} ${value['lastname']}`
+                        return `${value['name']}`
                     })
                     const userBooks: UserBook[] = results[0].map<UserBook>((value): UserBook => {
                         return new UserBook(
@@ -85,7 +85,7 @@ export class UserBooksController {
             where user_book.user_id = ? 
             limit ? 
             offset ?; 
-            select firstname, lastname from author 
+            select name from author 
             inner join book_author on book_author.author_id = author.id;`
 
             myPool.query({
@@ -96,7 +96,7 @@ export class UserBooksController {
                     reject(error)
                 } else {
                     const authors = results[1].map<string>((value) => {
-                        return `${value['firstname']} ${value['lastname']}`
+                        return `${value['name']}`
                     })
                     const userBooks: UserBook[] = results[0].map<UserBook>((value): UserBook => {
                         return new UserBook(
@@ -194,10 +194,8 @@ export class UserBooksController {
                     let book: Book = bookDetails.book
                     bookId = await bookController.insertBook(book, connection)
                     for(let i = 0; i < book.authors.length; i++){
-                        let name = book.authors[i].split(' ')
-                        let firstname = name[0]
-                        let lastname = name.length > 1 ? name[1]:''
-                        let authorId = await bookController.insertAuthor(firstname, lastname, connection)
+                        let name = book.authors[i]
+                        let authorId = await bookController.insertAuthor(name, connection)
                         await bookController.addAuthorToBook(authorId, bookId, connection)
                     }
                 } catch(error){
@@ -263,10 +261,8 @@ export class UserBooksController {
             try{
                 let bookId = await bookController.insertBook(book, connection)
                 for(let i = 0; i < book.authors.length; i++){
-                    let name = book.authors[i].split(' ')
-                    let firstname = name[0]
-                    let lastname = name.length > 1 ? name[1]:''
-                    let authorId = await bookController.insertAuthor(firstname, lastname, connection)
+                    let name = book.authors[i]
+                    let authorId = await bookController.insertAuthor(name, connection)
                     await bookController.addAuthorToBook(authorId, bookId, connection)
                 }
 
