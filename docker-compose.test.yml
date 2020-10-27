@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+    mysql:
+        image: mysql:8.0.21
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_USER=dev_user
+            - MYSQL_PASSWORD=secretpassword
+            - MYSQL_DATABASE=papertrail_dev
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./utils/:/docker-entrypoint-initdb.d/
+
+    web:
+        build:
+            context: .
+            dockerfile: dockerfiles/Dockerfile.dev
+        command: yarn run test
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./package.json:/code/package.json
+            - ./src:/code/src
+        environment:
+            - NODE_ENV=test
+            - PORT=3000
+            - db_database=papertrail_dev
+            - db_host=mysql
+            - db_password=secretpassword
+            - db_user=dev_user
+
+volumes:
+    papertrail_tests:
+        driver: local            
