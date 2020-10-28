@@ -1,7 +1,7 @@
 /**
  * Required External Modules
  */
-import * as dotenv from "dotenv";
+// import * as dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -11,9 +11,9 @@ if (!process.env.NODE_ENV){
   process.env.NODE_ENV = 'development'
 };
 
-dotenv.config({
-  path: `./env/${process.env.NODE_ENV}.env`,
-});
+// dotenv.config({
+//   path: `./env/${process.env.NODE_ENV}.env`,
+// });
 
 /**
  * App Variables
