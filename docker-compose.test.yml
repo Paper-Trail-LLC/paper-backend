@@ -19,7 +19,7 @@ services:
             dockerfile: dockerfiles/Dockerfile.dev
         command: ./wait-for-it.sh mysql:3306 -t 0 -- yarn run test
         ports:
-            - "8081:3000"
+            - "3000:3000"
         depends_on: 
             - mysql
         volumes:
