@@ -11,20 +11,22 @@ services:
         ports:
             - "3306:3306"
         volumes:
-            - ./utils/:/docker-entrypoint-initdb.d/
+            - ./utils/00_paperTrailDBInit.sql:/docker-entrypoint-initdb.d/00_paperTrailDBInit.sql
 
-    web:
+    web-test:
         build:
             context: .
             dockerfile: dockerfiles/Dockerfile.dev
         command: yarn run test
         ports:
             - "3000:3000"
+        depends_on: 
+            - mysql
         volumes:
             - ./package.json:/code/package.json
             - ./src:/code/src
         environment:
-            - NODE_ENV=test
+            - NODE_ENV=testing
             - PORT=3000
             - db_database=papertrail_dev
             - db_host=mysql

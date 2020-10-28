@@ -13,7 +13,7 @@
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript, Node\" -c \"yello.bold, cyan.bold\" \"yarn webpack\" \"yarn run start\"",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
-    "watch-node": "nodemon dist/app.js",
+    "watch-node": "nodemon dist/index.js",
     "test": "jest"
   },
   "_moduleAliases": {
@@ -26,7 +26,8 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "helmet": "^4.1.1",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",

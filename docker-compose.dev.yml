@@ -16,11 +16,12 @@ services:
     web:
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: dockerfiles/Dockerfile.dev
         ports:
             - "3000:3000"
         volumes:
             - ./package.json:/code/package.json
+            - ./webpack.config.ts:/code/webpack.config.ts
             - ./src:/code/src
         environment:
             - NODE_ENV=development

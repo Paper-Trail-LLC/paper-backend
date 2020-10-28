@@ -1,0 +1,54 @@
+image: docker/compose
+
+# using repository environment variables in the CI environment
+variables:
+  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  DOCKER_DRIVER: overlay
+
+services:
+- docker:dind
+
+before_script:
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+stages:
+  - build
+  - test
+  - deploy
+
+build-production:
+  stage: build
+  script:
+    - echo "Building image..."
+    - docker build -f dockerfiles/Dockerfile.prod -t $CONTAINER_RELEASE_IMAGE .
+    - echo "Pushing image..."
+    - docker push $CONTAINER_RELEASE_IMAGE
+  only:
+    - master
+
+test:
+  only:
+    - merge_requests
+  except:
+    variables:
+      - $CI_MERGE_REQUEST_TITLE =~ /^WIP:/
+  stage: test
+  script:
+    - docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from web_test
+  after_script:
+    - docker-compose -f docker-compose.test.yml down
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Logging in to Gitlab container registry"
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker pull $CONTAINER_RELEASE_IMAGE
+    - docker tag $CONTAINER_RELEASE_IMAGE registry.heroku.com/paper-be/web:latest
+    - docker login --username=_ --password=$HEROKU_AUTH_TOKEN registry.heroku.com
+    - docker push registry.heroku.com/paper-be/web:latest
+    - docker run --rm -e HEROKU_API_KEY=$HEROKU_API_KEY wingrunr21/alpine-heroku-cli container:release web --app paper-be
+    - echo "App deployed in "
+  only:
+    - master
