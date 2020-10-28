@@ -35,7 +35,7 @@ test:
       - $CI_MERGE_REQUEST_TITLE =~ /^WIP:/
   stage: test
   script:
-    - docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from web_test
+    - docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from web-test
   after_script:
     - docker-compose -f docker-compose.test.yml down
 
