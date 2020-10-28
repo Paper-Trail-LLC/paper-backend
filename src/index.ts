@@ -1,30 +1,31 @@
 /**
  * Required External Modules
  */
-// import * as dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import {routesInit} from "./routes"
+import { routesInit } from "./routes"
+import { Server } from "http";
 
-if (!process.env.NODE_ENV){
+if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development'
 };
-
-// dotenv.config({
-//   path: `./env/${process.env.NODE_ENV}.env`,
-// });
+console.log(`Running with env: ${process.env.NODE_ENV}`);
+dotenv.config({
+  path: `./env/${process.env.NODE_ENV}.env`,
+});
 
 /**
  * App Variables
  */
 if (!process.env.PORT) {
-    process.exit(1);
- }
- 
- const PORT: number = parseInt(process.env.PORT as string, 10);
- const app: express.Application = express();
+  process.exit(1);
+}
 
+const PORT: number = parseInt(process.env.PORT as string, 10);
+const app: express.Application = express();
+let server: Server;
 /**
  *  App Configuration
  */
@@ -32,17 +33,10 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 routesInit(app);
-/**
- * Server Activation
- */
-const server = app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}`);
-  });
 
 /**
  * Webpack HMR Activation
  */
-
 type ModuleId = string | number;
 
 interface WebpackHotModule {
@@ -60,7 +54,18 @@ interface WebpackHotModule {
 
 declare const module: WebpackHotModule;
 
-if (module.hot) {
+if (!process.env.NODE_ENV.toLowerCase().includes("test")) {
+  /**
+   * Server Activation
+   */
+  server = app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
+  });
+
+  if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => server.close());
- }
+  }
+
+
+}

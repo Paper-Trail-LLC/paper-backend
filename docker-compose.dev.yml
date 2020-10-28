@@ -11,7 +11,7 @@ services:
         ports:
             - "3306:3306"
         volumes:
-            - ./utils/paperTrailDBInit.sql:/docker-entrypoint-initdb.d/AppDatabase.sql
+            - ./utils/00_paperTrailDBInit.sql:/docker-entrypoint-initdb.d/AppDatabase.sql
 
     web:
         build:

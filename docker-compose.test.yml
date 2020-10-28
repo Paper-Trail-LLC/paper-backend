@@ -17,7 +17,7 @@ services:
         build:
             context: .
             dockerfile: dockerfiles/Dockerfile.dev
-        command: yarn run test
+        command: ./wait-for-it.sh mysql:3306 -t 0 -- yarn run test
         ports:
             - "3000:3000"
         depends_on: 
@@ -35,4 +35,4 @@ services:
 
 volumes:
     papertrail_tests:
-        driver: local            
+        driver: local

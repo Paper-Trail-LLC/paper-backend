@@ -4,6 +4,7 @@ EXPOSE 3000
 WORKDIR /code
 
 COPY package.json .
+COPY /utils/wait-for-it.sh .
 RUN yarn install
 
 COPY . .
