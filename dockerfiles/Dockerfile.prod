@@ -20,7 +20,7 @@ COPY package*.json ./
 # Set environment for correct variables
 ENV NODE_ENV=heroku
 # Install only production dependencies
-RUN yarn install --production
+RUN yarn install
 
 # Copy only dist/
 COPY --from=builder /code/dist ./
