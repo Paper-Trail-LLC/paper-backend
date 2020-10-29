@@ -2,7 +2,7 @@
   "name": "paper-backend",
   "version": "1.0.0",
   "description": "Paper Trail System Backend",
-  "main": "index.ts",
+  "main": "index.js",
   "repository": "https://github.com/Paper-Trail-LLC/paper-backend",
   "author": "Gabriel Huertas Marrero <gabriel.huertasm@gmail.com>",
   "license": "MIT",
