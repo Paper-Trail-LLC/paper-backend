@@ -2,7 +2,7 @@
 # Builder stage
 # This state builds our TypeScript and produces an intermediate Docker image containing the compiled JavaScript code.
 #
-FROM node:12.18.4 as builder
+FROM node:12.19.0-alpine as builder
 WORKDIR /code
 COPY . .
 RUN yarn install && yarn build-ts
