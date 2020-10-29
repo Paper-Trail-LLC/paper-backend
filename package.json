@@ -13,7 +13,7 @@
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript, Node\" -c \"yello.bold, cyan.bold\" \"yarn webpack\" \"yarn run start\"",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
-    "watch-node": "node ./index",
+    "watch-node": "node ./index.js",
     "test": "jest"
   },
   "_moduleAliases": {
