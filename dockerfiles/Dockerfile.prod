@@ -23,7 +23,7 @@ ENV NODE_ENV=heroku
 RUN yarn install --production
 
 # Copy only dist/
-COPY --from=builder /code/dist ./dist/
+COPY --from=builder /code/dist ./
 
 # Chown all the files to the built-in non-root user
 RUN chown -R node:node /usr/src/app

@@ -8,12 +8,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/index",
     "webpack": "webpack --config webpack.config.ts",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript, Node\" -c \"yello.bold, cyan.bold\" \"yarn webpack\" \"yarn run start\"",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
-    "watch-node": "nodemon dist/index.js",
+    "watch-node": "node ./index",
     "test": "jest"
   },
   "_moduleAliases": {
