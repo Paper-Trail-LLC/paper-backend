@@ -12,7 +12,7 @@ RUN yarn install && yarn build-ts
 # This stage pulls the compiled JavaScript code from the builder stage intermediate image.
 # This stage builds the final Docker image that we'll use in production.
 #
-FROM node:12.18.4 as prod
+FROM node:12.19.0-alpine as prod
 
 # Define project dir
 WORKDIR /usr/src/app
@@ -23,7 +23,7 @@ ENV NODE_ENV=heroku
 RUN yarn install --production
 
 # Copy only dist/
-COPY --from=builder /code/dist ./
+COPY --from=builder /code/dist ./dist/
 
 # Chown all the files to the built-in non-root user
 RUN chown -R node:node /usr/src/app
