@@ -1,10 +1,10 @@
 import {UserBooksController} from './userbooks.controller'
-import server from '../../index'
+// import server from '../../index'
 import myPool from '../../helpers/mysql.pool'
-import request from 'supertest'
+// import request from 'supertest'
 
 const userBooksController = new UserBooksController()
-const app = request(server)
+// const app = request(server)
 
 describe('userbook routes tests', () => {
     describe('userbook library enpoint', () => {
