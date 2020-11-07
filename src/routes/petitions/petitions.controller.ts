@@ -3,9 +3,9 @@ import { BookPetition } from "../../models/petition";
 
 export class PetitionsController {
 
-    public async searchPetitions(status?: string, lending?: number, selling?: number, currentLocation?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
+    public async searchPetitions(status?: string, lending?: number, selling?: number, currentLocation?: number, expired?: boolean, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
         return new Promise<BookPetition[]>((resolve, reject) => {
-            console.log(status, lending, selling, currentLocation, page, limit)
+            console.log(status, lending, selling, currentLocation, expired, page, limit)
             resolve([])
         })
     }
@@ -17,9 +17,9 @@ export class PetitionsController {
         })
     }
 
-    public async getPetitionsByUser(userId: string, status?: string, lending?: number, selling?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
+    public async getPetitionsByUser(userId: string, status?: string, lending?: number, selling?: number, expired?: boolean, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
         return new Promise<BookPetition[]>((resolve, reject) => {
-            console.log(userId, status, lending, selling, page, limit)
+            console.log(userId, status, lending, selling, expired, page, limit)
         })
     }
 

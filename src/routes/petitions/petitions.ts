@@ -60,8 +60,9 @@ petitionsRouter.get('/search', async (req: Request, res: Response): Promise<void
         const lending: number | undefined = +(req.query.lending as string) || undefined
         const status: string = req.query.status as string
         const currentLocation: number | undefined = +(req.query.currentLocation as string) || undefined
+        const expired: boolean = (req.query.expired as string) === 'true'? true : false
 
-        const petitions: BookPetition[] = await petitionsController.searchPetitions(status, lending, selling, currentLocation, page, limit)
+        const petitions: BookPetition[] = await petitionsController.searchPetitions(status, lending, selling, currentLocation, expired, page, limit)
         
         res.json({
             data: petitions
@@ -83,8 +84,9 @@ petitionsRouter.get('/user/:userId', async (req: Request, res: Response): Promis
         const selling: number | undefined = +(req.query.selling as string) || undefined
         const lending: number | undefined = +(req.query.lending as string) || undefined
         const status: string = req.query.status as string
+        const expired: boolean = (req.query.expired as string) === 'true'? true : false
 
-        const bookPetitions: BookPetition[] = await petitionsController.getPetitionsByUser(userId, status, lending, selling, page, limit)
+        const bookPetitions: BookPetition[] = await petitionsController.getPetitionsByUser(userId, status, lending, selling, expired, page, limit)
 
         res.json({
             data: bookPetitions
