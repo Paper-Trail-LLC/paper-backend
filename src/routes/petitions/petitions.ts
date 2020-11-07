@@ -41,3 +41,25 @@ petitionsRouter.get('/search', async (req: Request, res: Response) => {
         })
     }
 })
+
+petitionsRouter.get('/:userId', async (req: Request, res: Response) => {
+    try{
+        const userId: string = req.params.userId
+        const page: number | undefined = +(req.query.page as string) || undefined
+        const limit: number | undefined = +(req.query.limit as string) || undefined
+
+        const selling: number | undefined = +(req.query.selling as string) || undefined
+        const lending: number | undefined = +(req.query.lending as string) || undefined
+        const status: string = req.query.status as string
+
+        const bookPetitions: BookPetition[] = await petitionsController.getPetitionsByUser(userId, status, lending, selling, page, limit)
+
+        res.json({
+            data: bookPetitions
+        })
+    } catch(error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+})
