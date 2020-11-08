@@ -5,12 +5,12 @@ export class PetitionsController {
 
     public async searchPetitions(expired: boolean, status?: string, lending?: number, selling?: number, currentLocation?: [number, number], searchRadius?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
         return new Promise<BookPetition[]>((resolve, reject) => {
-            const query = `select * from book_petition 
+            const query = `select *, bin_to_uuid(id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id from book_petition 
             where expiration_date ${expired? '<':'>'} now() 
             ${status? 'and status = ? ':''}
             ${lending != undefined? 'and lending = ? ':''}
             ${selling != undefined? 'and selling = ? ':''}
-            ${currentLocation? 'and ST_Distance(Point(?, ?), geolocation) <= ? and (location_radius is null or (ST_Distance(Point(?, ?), geolocation) <= location_radius) ':'and location_radius is null '}
+            ${currentLocation? 'and ST_Distance(Point(?, ?), geolocation) <= ? and (location_radius is null or ST_Distance(Point(?, ?), geolocation) <= location_radius) ':''}
             limit ? 
             offset ?;`
 
@@ -37,8 +37,8 @@ export class PetitionsController {
                 } else {
                     const bookPetitions: BookPetition[] = results.map<BookPetition>((value) => {
                         return new BookPetition(
-                            value['book_id'],
-                            value['user_id'],
+                            value['full_book_id'],
+                            value['full_user_id'],
                             value['description'],
                             value['lending'],
                             value['selling'],
@@ -46,7 +46,8 @@ export class PetitionsController {
                             [value['geolocation'].x, value['geolocation'].y],
                             value['location_radius'],
                             value['expiration_date'],
-                            value['created_on']
+                            value['created_on'],
+                            value['full_id']
                         )
                     })
                     resolve(bookPetitions)
@@ -57,7 +58,7 @@ export class PetitionsController {
 
     public async getPetitionById(petitionId: string): Promise<BookPetition> {
         return new Promise<BookPetition>((resolve, reject) => {
-            const query = `select * from book_petition 
+            const query = `select *, bin_to_uuid(id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id from book_petition 
             where id = ?;`
 
             myPool.query({
@@ -69,8 +70,8 @@ export class PetitionsController {
                 } else {
                     const bookPetitions: BookPetition[] = results.map<BookPetition>((value) => {
                         return new BookPetition(
-                            value['book_id'],
-                            value['user_id'],
+                            value['full_book_id'],
+                            value['full_user_id'],
                             value['description'],
                             value['lending'],
                             value['selling'],
@@ -78,7 +79,8 @@ export class PetitionsController {
                             [value['geolocation'].x, value['geolocation'].y],
                             value['location_radius'],
                             value['expiration_date'],
-                            value['created_on']
+                            value['created_on'],
+                            value['full_id']
                         )
                     })
                     resolve(bookPetitions[0])
@@ -89,7 +91,7 @@ export class PetitionsController {
 
     public async getPetitionsByUser(userId: string, expired: boolean, status?: string, lending?: number, selling?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
         return new Promise<BookPetition[]>((resolve, reject) => {
-            const query = `select * from book_petition 
+            const query = `select *, bin_to_uuid(id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id from book_petition 
             where user_id = ? 
             and expiration_date ${expired? '<':'>'} now() 
             ${status? 'and status = ? ':''}
@@ -115,8 +117,8 @@ export class PetitionsController {
                 } else {
                     const bookPetitions: BookPetition[] = results.map<BookPetition>((value) => {
                         return new BookPetition(
-                            value['book_id'],
-                            value['user_id'],
+                            value['full_book_id'],
+                            value['full_user_id'],
                             value['description'],
                             value['lending'],
                             value['selling'],
@@ -124,7 +126,8 @@ export class PetitionsController {
                             [value['geolocation'].x, value['geolocation'].y],
                             value['location_radius'],
                             value['expiration_date'],
-                            value['created_on']
+                            value['created_on'],
+                            value['full_id']
                         )
                     })
                     resolve(bookPetitions)
@@ -136,9 +139,9 @@ export class PetitionsController {
     public async insertBookPetition(userId: string, bookId: string, status: string, description: string, lending: number, selling: number, geolocation: [number, number], locationRadius: number, expirationDate: Date): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             let query = `set @petitionId = uuid_to_bin(uuid()); 
-            insert into book_petition (user_id, book_id, status, description, lending, selling, geolocation, location_radius, expiration_date) 
-            values (?, ?, ?, ?, ?, ?, ST_GeomFromText('Point(? ?)'), ?, ?); 
-            select @petitionId;`
+            insert into book_petition (id, user_id, book_id, status, description, lending, selling, geolocation, location_radius, expiration_date) 
+            values (@petitionId, uuid_to_bin(?), uuid_to_bin(?), ?, ?, ?, ?, ST_GeomFromText('Point(? ?)'), ?, ?); 
+            select bin_to_uuid(@petitionId) as petitionId;`
 
             myPool.query({
                 sql: query,
@@ -147,7 +150,7 @@ export class PetitionsController {
                 if(error){
                     reject(error)
                 } else {
-                    resolve(results[2][0]['@petitionId'])
+                    resolve(results[2][0]['petitionId'])
                 }
             })
         })

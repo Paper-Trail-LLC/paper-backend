@@ -31,7 +31,7 @@ petitionsRouter.post('/', async (req: Request, res: Response): Promise<void> => 
         const locationRadius: number = +(req.body.locationRadius as string)
         const expirationDate: string = req.body.expirationDate as string
 
-        if(!bookId || !description || !lending || !selling || !status || !lat || !lon || !locationRadius || !expirationDate){
+        if(!bookId || !description || lending == NaN || selling == NaN || !status || lat == NaN || lon == NaN || locationRadius == NaN || !expirationDate){
             res.status(400).json({
                 error: 'Missing parameters in body. userId, bookId, status, description, lending, selling, lon, lat, locationRadius, expirationDate are required.'
             })
