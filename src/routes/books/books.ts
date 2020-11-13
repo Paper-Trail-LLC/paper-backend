@@ -74,3 +74,5 @@ booksRouter.get('/search', async (req: Request, res: Response): Promise<void> =>
         })
     }
 })
+
+//GET BOOK BY ID

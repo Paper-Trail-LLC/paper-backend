@@ -65,7 +65,6 @@ if (!process.env.NODE_ENV.toLowerCase().includes("test")) {
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => server.close());
-  }
-
-
+ }
 }
+export default app
