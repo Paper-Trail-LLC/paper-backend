@@ -1,5 +1,7 @@
 import { BookPetition } from "../../models/petition";
 import myPool from "../../helpers/mysql.pool"
+import { BooksController } from "../books/books.controller";
+import { PoolConnection } from "mysql";
 
 export class PetitionsController {
 
@@ -139,24 +141,82 @@ export class PetitionsController {
         })
     }
 
-    public async insertBookPetition(userId: string, bookId: string, status: string, description: string, lending: number, selling: number, geolocation: [number, number], locationRadius: number, expirationDate: Date): Promise<string> {
-        return new Promise<string>((resolve, reject) => {
-            let query = `set @petitionId = uuid_to_bin(uuid()); 
-            insert into book_petition (id, user_id, book_id, status, description, lending, selling, geolocation, location_radius, expiration_date) 
-            values (@petitionId, uuid_to_bin(?), uuid_to_bin(?), ?, ?, ?, ?, ST_GeomFromText('Point(? ?)'), ?, ?); 
-            select bin_to_uuid(@petitionId) as petitionId;`
+    public async insertBookPetition(userId: string, isbn: string, status: string, description: string, lending: number, selling: number, geolocation: [number, number], locationRadius: number, expirationDate: Date): Promise<string> {
+        try {
+            const bookController = new BooksController()
 
-            myPool.query({
-                sql: query,
-                values: [userId, bookId, status, description, lending, selling, geolocation[0], geolocation[1], locationRadius, expirationDate]
-            }, (error, results: Array<Array<any>>) => {
-                if(error){
-                    reject(error)
-                } else {
-                    resolve(results[2][0]['petitionId'])
+            const book = await bookController.getBookByISBN(isbn)
+            if(!book) {
+                throw new Error(`Book with ISBN ${isbn} not found.`)
+            }
+
+            return new Promise<PoolConnection>((resolve, reject) => {
+                myPool.getConnection((error, connection) => {
+                    if(error){
+                        reject(error)
+                    } else {
+                        resolve(connection)
+                    }
+                })
+            }).then((connection) => {
+                return new Promise<PoolConnection>((resolve, reject) => {
+                    connection.beginTransaction((error) => {
+                        if(error){
+                            reject(error)
+                        } else {
+                            resolve(connection)
+                        }
+                    })
+                })
+            }).then(async (connection) => {
+                try{
+                    const bookId = await bookController.insertBook(book, connection)
+                    for(let i = 0; i < book.authors.length; i++){
+                        let name = book.authors[i]
+                        let authorId = await bookController.insertAuthor(name, connection)
+                        await bookController.addAuthorToBook(authorId, bookId, connection)
+                    }
+
+                    return new Promise<string>((resolve, reject) => {
+                        let query = `set @petitionId = uuid_to_bin(uuid()); 
+                        insert into book_petition (id, user_id, book_id, status, description, lending, selling, geolocation, location_radius, expiration_date) 
+                        values (@petitionId, uuid_to_bin(?), uuid_to_bin(?), ?, ?, ?, ?, ST_GeomFromText('Point(? ?)'), ?, ?); 
+                        select bin_to_uuid(@petitionId) as petitionId;`
+            
+                        connection.query({
+                            sql: query,
+                            values: [userId, bookId, status, description, lending, selling, geolocation[0], geolocation[1], locationRadius, expirationDate]
+                        }, (error, results: Array<Array<any>>) => {
+                            if(error){
+                                connection.rollback(() => {
+                                    reject(error)
+                                })
+                            } else {
+                                connection.commit((error) => {
+                                    if(error) {
+                                        connection.rollback(() => {
+                                            reject(error)
+                                        })
+                                    } else {
+                                        resolve(results[2][0]['petitionId'])
+                                    }
+                                })
+                            }
+                        })
+                    })
+                } catch (error){
+                    connection.rollback((error) => {
+                        if(error){
+                            console.log(error)
+                        }
+                    })
+                    throw new Error(error.message)
                 }
             })
-        })
+
+        } catch(error){
+            throw new Error(error.message)
+        }
     }
 
     public async updateBookPetition(petitionId: string, status?: string, description?: string, lending?: number, selling?: number, geolocation?: [number, number], locationRadius?: number, expirationDate?: Date): Promise<boolean> {
