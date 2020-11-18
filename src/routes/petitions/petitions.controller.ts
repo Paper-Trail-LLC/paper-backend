@@ -3,10 +3,12 @@ import myPool from "../../helpers/mysql.pool"
 
 export class PetitionsController {
 
-    public async searchPetitions(expired: boolean, status?: string, lending?: number, selling?: number, currentLocation?: [number, number], searchRadius?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
+    public async searchPetitions(expired: boolean, isbn?: string, status?: string, lending?: number, selling?: number, currentLocation?: [number, number], searchRadius?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
         return new Promise<BookPetition[]>((resolve, reject) => {
-            const query = `select *, bin_to_uuid(id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id from book_petition 
+            const query = `select *, bin_to_uuid(book_petition.id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id 
+            from book_petition inner join book on book_petition.book_id = book.id 
             where expiration_date ${expired? '<':'>'} now() 
+            ${isbn? 'and (isbn = ? or isbn13 = ?) ':''}
             ${status? 'and status = ? ':''}
             ${lending != undefined? 'and lending = ? ':''}
             ${selling != undefined? 'and selling = ? ':''}
@@ -15,6 +17,7 @@ export class PetitionsController {
             offset ?;`
 
             const v = []
+            if(isbn) v.push(isbn)
             if(status) v.push(status)
             if(lending != undefined) v.push(lending)
             if(selling != undefined) v.push(selling)
