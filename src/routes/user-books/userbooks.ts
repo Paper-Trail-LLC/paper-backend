@@ -30,11 +30,11 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
         const limit: number = +(req.query.limit as string)
         const page: number = +(req.query.page as string)
 
-        if(!isbn || !limit || !page){
+        if(!limit || !page){
             res.status(400).json({
                 error: "Query parameters 'isbn', 'limit', 'page' is required."
             })
-        } else if(isbn.length != 10 && isbn.length != 13){
+        } else if(isbn && isbn.length != 10 && isbn.length != 13){
             res.status(400).json({
                 error: "Query parameter 'isbn' must be of length 0 or 13."
             })

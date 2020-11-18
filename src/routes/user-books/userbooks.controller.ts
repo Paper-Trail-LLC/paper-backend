@@ -5,7 +5,7 @@ import {UserBook} from '../../models/userbook'
 import {BooksController} from "../books/books.controller"
 
 export class UserBooksController {
-    public async searchUserBooks(isbn: string, 
+    public async searchUserBooks(isbn?: string, 
         geolocation?: [number, number], 
         distance?: number,
         status?: string,
@@ -14,24 +14,29 @@ export class UserBooksController {
         limit: number = 25, 
         page: number = 1): Promise<UserBook[]>{
 
+        let params = false
+        if(isbn || geolocation || distance || status || lending != undefined || selling != undefined){
+            params = true
+        }
+
         return new Promise<UserBook[]>((resolve, reject) => {
             let query = 
             `select * from user_book 
             inner join book on user_book.book_id=book.id 
-            where ${isbn.length === 13 ? `isbn13`:`isbn`} = ? 
+            ${params? 'where':''} ${isbn? (isbn.length === 13 ? `isbn13 = ? `:`isbn = ? `):'true '} 
             ${status ? `and status = ? `:``}
             ${lending != undefined ? `and lending = ? `:``}
             ${selling != undefined? `and selling = ? `:``}
             ${geolocation && distance != undefined ? `and ST_Distance(Point(?, ?), geolocation) <= ? `:``}
-            limit ?
+            limit ? 
             offset ?; 
             select name from author 
             inner join book_author on book_author.author_id = author.id 
-            inner join book on book_author.book_id = book.id
-            where ${isbn.length === 13 ? `book.isbn13`:`book.isbn`} = ?;`
+            inner join book on book_author.book_id = book.id 
+            ${isbn? `where ${isbn.length === 13 ? `book.isbn13`:`book.isbn`} = ?;`:';'}`
 
             let v = []
-            v.push(isbn)
+            if(isbn) v.push(isbn)
             if(status) v.push(status)
             if(lending != undefined) v.push(lending)
             if(selling != undefined) v.push(selling)
@@ -42,7 +47,7 @@ export class UserBooksController {
             }
             v.push(limit)
             v.push(limit*(page-1))
-            v.push(isbn)
+            if(isbn) v.push(isbn)
 
             myPool.query({
                 sql: query,
