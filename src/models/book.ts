@@ -1,7 +1,7 @@
 // WIP
 export class Book {
     bookId?: string
-    synopsys?: string
+    synopsis?: string
     title: string
     authors: string[]
     isbn: string
@@ -10,7 +10,7 @@ export class Book {
     edition: string
     coverURI: string
 
-    constructor(title: string, authors: string[], isbn: string, isbn13: string, releaseDate: Date, edition: string, coverURI: string, bookId?: string, synopsys?: string){
+    constructor(title: string, authors: string[], isbn: string, isbn13: string, releaseDate: Date, edition: string, coverURI: string, bookId?: string, synopsis?: string){
         this.title = title
         this.authors = authors
         this.isbn = isbn
@@ -19,7 +19,7 @@ export class Book {
         this.edition = edition
         this.coverURI = coverURI
         this.bookId = bookId
-        this.synopsys = synopsys
+        this.synopsis = synopsis
     }
     
 }

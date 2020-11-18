@@ -94,7 +94,7 @@ export class BooksController {
             select @bookId;`
             p.query({
                 sql: insertBookQuery,
-                values: [book.title, book.isbn13, new Date(book.releaseDate), book.edition, book.coverURI, book.isbn, book.synopsys]
+                values: [book.title, book.isbn13, new Date(book.releaseDate), book.edition, book.coverURI, book.isbn, book.synopsis]
             }, (error, results) => {
                 if(error){
                     reject(error)
