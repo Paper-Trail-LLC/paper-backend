@@ -18,6 +18,29 @@ petitionsRouter.get('/', (req: Request, res: Response) => {
     });
 })
 
+/*
+Create petition
+
+Input:
+    Body: 
+    {
+        isbn: string
+        userId: string
+        description: string
+        lending: number //Possible values: 1, 0
+        selling: number //Possible values: 1, 0
+        status: string
+        lat: number
+        lon: number
+        locationRadius: number //Unit: Metre
+        expirationDate: Date
+    }
+Output:
+    {
+        success: boolean
+        bookPetitionId: string
+    }
+*/
 petitionsRouter.post('/', async (req: Request, res: Response): Promise<void> => {
     try{
         const userId: string = req.body.userId as string
@@ -52,6 +75,40 @@ petitionsRouter.post('/', async (req: Request, res: Response): Promise<void> => 
     }
 })
 
+/*
+Search petitions
+
+Input: 
+    Query Parameters:
+        page: number (Optional)
+        limit: number (Optional)
+        isbn: string (Optional)
+        selling: number (Optional) //Possible values: 1, 0
+        lending: number (Optional) //Possible values: 1, 0
+        status: string (Optional)
+        currentLat: number (Optional) //Required if searching by distance
+        currentLon: number (Optional) //Required if searching by distance
+        searchRadius: number (Optional) //Required if searching by distance //Unit: Metre
+        expired: boolean (Optional) //Possible values: 'true'
+Output:
+    {
+        data: [
+            {
+                petitionId: string
+                bookId: string
+                userId: string
+                description: string
+                lending: number
+                selling: number
+                status: string
+                geolocation: [number, number] //Format is [longitud, latitud]
+                locationRadius: number //Unit: Metre
+                expirationDate: Date
+                createdOn: Date
+            }
+        ]
+    }
+*/
 petitionsRouter.get('/search', async (req: Request, res: Response): Promise<void> => {
     try {
         const page: number | undefined = +(req.query.page as string) || undefined
@@ -91,6 +148,37 @@ petitionsRouter.get('/search', async (req: Request, res: Response): Promise<void
     }
 })
 
+/*
+Get petitions created by user with given userId
+
+Input:
+    userId in url path
+    Query Parameters:
+        page: number (Optional)
+        limit: number (Optional)
+        selling: number (Optional) //Possible values: 1, 0
+        lending: number (Optional) //Possible values: 1, 0
+        status: string (Optional)
+        expired: boolean (Optional) //Possible values: 'true'
+Output:
+    {
+        data: [
+            {
+                petitionId: string
+                bookId: string
+                userId: string
+                description: string
+                lending: number
+                selling: number
+                status: string
+                geolocation: [number, number] //Format is [longitud, latitud]
+                locationRadius: number //Unit: Metre
+                expirationDate: Date
+                createdOn: Date
+            }
+        ]
+    }
+*/
 petitionsRouter.get('/user/:userId', async (req: Request, res: Response): Promise<void> => {
     try{
         const userId: string = req.params.userId
@@ -114,6 +202,29 @@ petitionsRouter.get('/user/:userId', async (req: Request, res: Response): Promis
     }
 })
 
+/*
+Get petition by id
+
+Input: 
+    petitionId in url path
+Output:
+    Body:
+    {
+        data: {
+            petitionId: string
+            bookId: string
+            userId: string
+            description: string
+            lending: number
+            selling: number
+            status: string
+            geolocation: [number, number] //Format is [longitud, latitud]
+            locationRadius: number //Unit: Metre
+            expirationDate: Date
+            createdOn: Date
+        }
+    }
+*/
 petitionsRouter.get('/:petitionId', async (req: Request, res: Response): Promise<void> => {
     try {
         const petitionId: string = req.params.petitionId
@@ -131,6 +242,26 @@ petitionsRouter.get('/:petitionId', async (req: Request, res: Response): Promise
     }
 })
 
+/*
+Edit petition with given petitionId
+
+Input:
+    petitionId in url path
+    Body:
+        {
+            userId: string
+            description: string
+            selling: number (Optional) //Possible values: 1, 0
+            lending: number (Optional) //Possible values: 1, 0
+            status: string
+            lat: number
+            lon: number
+            locationRadius: number //Unit: Metre
+            expirationDate: Date
+        }
+Output:
+    Status Code 204. Does not return body if successful.
+*/
 petitionsRouter.put('/:petitionId', async (req: Request, res: Response) => {
     try{
         const petitionId: string = req.params.petitionId
