@@ -1,5 +1,5 @@
 FROM node:12.18.4
-EXPOSE 3000
+EXPOSE 8081
 
 WORKDIR /code
 
