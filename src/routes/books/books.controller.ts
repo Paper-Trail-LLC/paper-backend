@@ -14,7 +14,8 @@ export class BooksController {
             //If not found, search in external api
             const response: any = await ExternalAPI.get('/book/'+isbn)
             const book: any = response.data.book
-            const result = new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
+            let authors: string[] = book.authors
+            const result = new Book(book.title, authors.filter(a => a), book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
             return result
         } catch(error) {
             if(error.response.status == 404){
@@ -33,7 +34,8 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
+                let authors: string[] = book.authors
+                return new Book(book.title, authors.filter(a => a), book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
             })
             return result
         } catch(error) {
@@ -54,7 +56,8 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
+                let authors: string[] = book.authors
+                return new Book(book.title, authors.filter(a => a), book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
             })
             return result
         } catch(error) {
@@ -75,7 +78,8 @@ export class BooksController {
             })
             const books: any[] = response.data.books
             const result: Book[] = books.map<Book>((book: any): Book =>{
-                return new Book(book.title, book.authors, book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
+                let authors: string[] = book.authors
+                return new Book(book.title, authors.filter(a => a), book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
             })
             return result
         } catch(error) {

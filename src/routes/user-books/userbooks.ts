@@ -18,6 +18,44 @@ userBooksRouter.get('/', async (req: Request, res: Response): Promise<void> => {
     });
 });
 
+/*
+Search books owned by users (example: listings)
+
+Input:
+    Query Parameters:
+        isbn: string (Optional)
+        status: string (Optional)
+        selling: number (Optional) //Possible values: 1, 0
+        lending: number (Optional) //Possible values: 1, 0
+        distance: number (Optional) //Required if searching by distance //Unit: Metre
+        lat: number (Optional) //Required if searching by distance
+        lon: number (Optional) //Required if searching by distance
+        limit: number
+        page: number
+Output:
+    {
+        data: [
+            {
+                userBookId: string
+                userId: string
+                status: string
+                selling: number
+                lending: number
+                geolocation: [number, number] //Format [longitud, latitud]
+                bookId: string
+                synopsys: string
+                title: string
+                authors: string[]
+                isbn: string
+                isbn13: string 
+                releaseDate: Date
+                edition: string
+                coverURI: string
+                images: string[]
+            }
+        ]
+    }
+*/
 userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void> => {
     try{
         const isbn: string = req.query.isbn as string
@@ -30,11 +68,11 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
         const limit: number = +(req.query.limit as string)
         const page: number = +(req.query.page as string)
 
-        if(!isbn || !limit || !page){
+        if(!limit || !page){
             res.status(400).json({
                 error: "Query parameters 'isbn', 'limit', 'page' is required."
             })
-        } else if(isbn.length != 10 && isbn.length != 13){
+        } else if(isbn && isbn.length != 10 && isbn.length != 13){
             res.status(400).json({
                 error: "Query parameter 'isbn' must be of length 0 or 13."
             })
@@ -65,6 +103,38 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
     
 });
 
+/*
+Get books in library of user
+
+Input:
+    userId in url path
+    Query Parameters:
+        limit: number
+        page: number
+Output:
+    {
+        data: [
+            {
+                userBookId: string
+                userId: string
+                status: string
+                selling: number
+                lending: number
+                geolocation: [number, number] //Format [longitud, latitud]
+                bookId: string
+                synopsys: string
+                title: string
+                authors: string[]
+                isbn: string
+                isbn13: string 
+                releaseDate: Date
+                edition: string
+                coverURI: string
+                images: string[]
+            }
+        ]
+    }
+*/
 userBooksRouter.get('/library/:userId', async (req: Request, res: Response): Promise<void> => {
     try{
         const userId = req.params.userId
@@ -89,6 +159,28 @@ userBooksRouter.get('/library/:userId', async (req: Request, res: Response): Pro
     }
 });
 
+/*
+Add book to library
+
+Input:
+    userId in url path
+    Body:
+        {
+            isbn13: string
+            status: string
+            selling: number //Possible values: 1, 0
+            lending: number //Possible values: 1, 0
+            lat: number
+            lon: number
+        }
+Output:
+    {
+        data: {
+            success: boolean
+            userBookId: string
+        }
+    }
+*/
 userBooksRouter.post('/library/:userId', async (req: Request, res: Response): Promise<void> => {
     try{
         const userId: string = req.params.userId
@@ -119,6 +211,35 @@ userBooksRouter.post('/library/:userId', async (req: Request, res: Response): Pr
     }
 })
 
+/*
+Add custom book to library
+
+Input:
+    userId in url path
+    Body:
+        {
+            isbn13: string
+            status: string
+            selling: number //Possible values: 1, 0
+            lending: number //Possible values: 1, 0
+            lat: number
+            lon: number
+            title: string
+            authors: string[]
+            isbn: string
+            releaseDate: Date
+            edition: string
+            coverURI: string
+            synopsys: string
+        }
+Output:
+    {
+        data: {
+            success: boolean
+            userBookId: string
+        }
+    }
+*/
 userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Response): Promise<void> => {
     try{
         const userId: string = req.params.userId

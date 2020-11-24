@@ -18,6 +18,24 @@ booksRouter.get('/', async (req: Request, res: Response): Promise<void> => {
     });
 });
 
+/*
+Get book by isbn
+
+Input: isbn in url path
+Output: 
+    {
+        data: {
+            synopsys: string
+            title: string
+            authors: string[]
+            isbn: string
+            isbn13: string 
+            releaseDate: Date
+            edition: string
+            coverURI: string
+        }
+    }
+*/
 booksRouter.get('/isbn/:isbn', async (req: Request, res: Response): Promise<void> => {
     try{
         const book = await booksController.getBookByISBN(req.params.isbn)
@@ -37,6 +55,31 @@ booksRouter.get('/isbn/:isbn', async (req: Request, res: Response): Promise<void
     }
 });
 
+/*
+Search books by keywords
+
+Input:
+    Query Parameters:
+        keywords: string
+        criteria: string (Optional) // Possible values: 'title', 'author'
+        page: number
+        limit: number
+Output:
+    {
+        data: [
+            {
+                synopsys: string
+                title: string
+                authors: string[]
+                isbn: string
+                isbn13: string 
+                releaseDate: Date
+                edition: string
+                coverURI: string
+            }
+        ]
+    }
+*/
 booksRouter.get('/search', async (req: Request, res: Response): Promise<void> => {
     try{
         const keywords: string = req.query.keywords as string
