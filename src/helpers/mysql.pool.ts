@@ -10,4 +10,4 @@ myPool = mysql.createPool({
     multipleStatements: true
 })
 
-export = myPool;
+export default myPool;

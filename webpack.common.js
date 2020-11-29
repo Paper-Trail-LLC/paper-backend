@@ -1,15 +1,12 @@
+const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const webpack = require("webpack");
-const path = require("path");
-const nodeExternals = require("webpack-node-externals");
 
 module.exports = {
-  entry: ["webpack/hot/poll?100", "./src/index.ts"],
-  watch: true,
   target: "node",
-  externals: [
-    nodeExternals({
-      allowlist: ["webpack/hot/poll?100"]
-    })
+  plugins: [
+    // new CleanWebpackPlugin(['dist/*']) for < v2 versions of CleanWebpackPlugin
+    new CleanWebpackPlugin(),
   ],
   module: {
     rules: [
@@ -20,13 +17,11 @@ module.exports = {
       }
     ]
   },
-  mode: "development",
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
-  plugins: [new webpack.HotModuleReplacementPlugin()],
   output: {
     path: path.join(__dirname, "dist"),
     filename: "index.js"
-  }
+  },
 };

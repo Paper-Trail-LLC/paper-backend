@@ -31,5 +31,5 @@ RUN chown -R node:node /usr/src/app
 # Switch to non-root user
 USER node
 
-EXPOSE 8081
+# EXPOSE 8081
 CMD yarn watch-node
