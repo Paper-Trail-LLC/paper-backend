@@ -7,11 +7,13 @@
   "author": "Gabriel Huertas Marrero <gabriel.huertasm@gmail.com>",
   "license": "MIT",
   "private": true,
+  "type": "commonjs",
   "scripts": {
     "start": "node dist/index",
     "webpack": "webpack serve --config webpack.dev.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript, Node\" -c \"yello.bold, cyan.bold\" \"yarn webpack\" \"yarn run start\"",
     "build": "webpack --config webpack.prod.js",
+    "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "watch-node": "node ./index.js",
     "test": "jest"

@@ -5,7 +5,7 @@ import * as dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { routesInit } from "./routes"
+import { routesInit } from "./routes/index"
 import { Server } from "http";
 
 if (!process.env.NODE_ENV) {

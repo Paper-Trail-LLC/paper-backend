@@ -1,22 +1,22 @@
 version: "3.8"
 services:
-    mysql:
-        image: mysql:8.0.21
-        command: --default-authentication-plugin=mysql_native_password
-        environment:
-            - MYSQL_ROOT_PASSWORD=root
-            - MYSQL_USER=dev_user
-            - MYSQL_PASSWORD=secretpassword
-            - MYSQL_DATABASE=papertrail_dev
-        ports:
-            - "3306:3306"
-        volumes:
-            - ./utils/00_paperTrailDBInit.sql:/docker-entrypoint-initdb.d/AppDatabase.sql
+    # mysql:
+    #     image: mysql:8.0.21
+    #     command: --default-authentication-plugin=mysql_native_password
+    #     environment:
+    #         - MYSQL_ROOT_PASSWORD=root
+    #         - MYSQL_USER=dev_user
+    #         - MYSQL_PASSWORD=secretpassword
+    #         - MYSQL_DATABASE=papertrail_dev
+    #     ports:
+    #         - "3306:3306"
+    #     volumes:
+    #         - ./utils/00_paperTrailDBInit.sql:/docker-entrypoint-initdb.d/AppDatabase.sql
 
     web:
         build:
             context: .
-            dockerfile: dockerfiles/Dockerfile.dev
+            dockerfile: dockerfiles/Dockerfile.prod
         ports:
             - "8081:8081"
         volumes:

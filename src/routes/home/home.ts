@@ -23,7 +23,6 @@ export const homeRouter = express.Router();
  * Controller Definitions
  */
 homeRouter.get('/', async (req: Request, res: Response): Promise<void> => {
-    console.log("Hello! I changed!");
     res.json({
         message: 'Welcome to Paper Trail!',
         query: req.query
