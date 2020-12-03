@@ -1,6 +1,6 @@
 import { Book } from "../../models/book";
 import express, { Request, Response } from "express";
-import {UserBooksController} from './userbooks.controller'
+import { UserBooksController } from './userbooks.controller'
 /**
  * Router Definition
  */
@@ -57,7 +57,7 @@ Output:
     }
 */
 userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void> => {
-    try{
+    try {
         const isbn: string = req.query.isbn as string
         const status: string = req.query.status as string
         const selling: number = +(req.query.selling as string)
@@ -68,23 +68,23 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
         const limit: number = +(req.query.limit as string)
         const page: number = +(req.query.page as string)
 
-        if(!limit || !page){
+        if (!limit || !page) {
             res.status(400).json({
                 error: "Query parameters 'isbn', 'limit', 'page' is required."
             })
-        } else if(isbn && isbn.length != 10 && isbn.length != 13){
+        } else if (isbn && isbn.length != 10 && isbn.length != 13) {
             res.status(400).json({
                 error: "Query parameter 'isbn' must be of length 0 or 13."
             })
-        } else if(lending && (lending != 0 && lending != 1)){
+        } else if (lending && (lending != 0 && lending != 1)) {
             res.status(400).json({
                 error: "Query parameter 'lending' must be 0 or 1."
             })
-        } else if(selling && (selling != 0 && selling != 1)){
+        } else if (selling && (selling != 0 && selling != 1)) {
             res.status(400).json({
                 error: "Query parameter 'selling' must be 0 or 1."
             })
-        } else if(distance && (!lat || !lon)){
+        } else if (distance && (!lat || !lon)) {
             res.status(400).json({
                 error: "Query parameters 'lat' and 'lon' are required when 'distance' is used."
             })
@@ -95,12 +95,12 @@ userBooksRouter.get('/search', async (req: Request, res: Response): Promise<void
             });
         }
 
-    } catch(error){
+    } catch (error) {
         res.status(500).json({
             error: error.message
         })
     }
-    
+
 });
 
 /*
@@ -136,12 +136,12 @@ Output:
     }
 */
 userBooksRouter.get('/library/:userId', async (req: Request, res: Response): Promise<void> => {
-    try{
+    try {
         const userId = req.params.userId
         const limit: number = +(req.query.limit as string)
         const page: number = +(req.query.page as string)
 
-        if(!limit || !page){
+        if (!limit || !page) {
             res.status(400).json({
                 error: "Query parameters 'limit', 'page' is required."
             })
@@ -152,7 +152,7 @@ userBooksRouter.get('/library/:userId', async (req: Request, res: Response): Pro
             })
         }
 
-    } catch(error){
+    } catch (error) {
         res.status(500).json({
             error: error.message
         })
@@ -182,7 +182,7 @@ Output:
     }
 */
 userBooksRouter.post('/library/:userId', async (req: Request, res: Response): Promise<void> => {
-    try{
+    try {
         const userId: string = req.params.userId
         const status: string = req.body.status
         const lending: number = req.body.lending
@@ -191,7 +191,7 @@ userBooksRouter.post('/library/:userId', async (req: Request, res: Response): Pr
         const lon: number = req.body.lon
         const isbn13: string = req.body.isbn13
 
-        if(!status || ! lending || !selling || !lat || !lon || !isbn13){
+        if (!status || !lending || !selling || !lat || !lon || !isbn13) {
             res.status(400).json({
                 error: 'Missing parameters in body. userId, status, lending, selling, lat, lon and isbn13 are required.'
             })
@@ -204,12 +204,43 @@ userBooksRouter.post('/library/:userId', async (req: Request, res: Response): Pr
                 }
             })
         }
-    } catch (error){
+    } catch (error) {
         res.status(500).json({
             error: error.message
         })
     }
 })
+
+
+/*
+Remove book from library
+
+Input:
+    user_book_id in url path
+Output:
+    {
+        data: {
+            success: boolean
+            userBookId: string
+        }
+    }
+*/
+userBooksRouter.delete('/library/:user_book_id', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const user_book_id: string = req.params.user_book_id;
+        await userBooksController.deleteLibraryOfUser(user_book_id);
+        res.status(200).json({
+            data: {
+                success: true,
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+})
+
 
 /*
 Add custom book to library
@@ -241,7 +272,7 @@ Output:
     }
 */
 userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Response): Promise<void> => {
-    try{
+    try {
         const userId: string = req.params.userId
         const status: string = req.body.status
         const lending: number = req.body.lending
@@ -259,7 +290,7 @@ userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Respon
         const synopsys: string = req.body.synopsys
 
 
-        if(!status || ! lending || !selling || !lat || !lon || !isbn13 || !title || !authors || !isbn || !releaseDate || !edition || !coverURI){
+        if (!status || !lending || !selling || !lat || !lon || !isbn13 || !title || !authors || !isbn || !releaseDate || !edition || !coverURI) {
             res.status(400).json({
                 error: 'Missing parameters in body. userId, status, lending, selling, lat, lon and isbn13 are required.'
             })
@@ -273,7 +304,7 @@ userBooksRouter.post('/library/:userId/custom', async (req: Request, res: Respon
                 }
             })
         }
-    } catch (error){
+    } catch (error) {
         res.status(500).json({
             error: error.message
         })
