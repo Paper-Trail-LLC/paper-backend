@@ -221,7 +221,6 @@ Output:
     {
         data: {
             success: boolean
-            userBookId: string
         }
     }
 */
