@@ -2,6 +2,8 @@ import { homeRouter } from "./home/home"
 import { booksRouter } from "./books/books"
 import { userBooksRouter } from "./user-books/userbooks"
 import { petitionsRouter } from "./petitions/petitions"
+import { userRouter } from "./users/user"
+import { authRouter } from "./auth/auth"
 import express from "express"
 
 /**
@@ -12,4 +14,6 @@ export function routesInit(app: express.Application): void {
     app.use("/books", booksRouter)
     app.use("/userbooks", userBooksRouter)
     app.use("/petitions", petitionsRouter)
+    app.use("/user", userRouter)
+    app.use("/auth", authRouter)
 };
