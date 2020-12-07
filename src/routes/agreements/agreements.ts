@@ -8,6 +8,58 @@ export const agreementsRouter = express.Router()
 
 const agreementsController = new AgreementsController()
 
+/*
+Search for agreements (all three types)
+
+Input: 
+    Query Parameters:
+        type: string (Required) //Possible values: 'meeting', 'borrow', 'purchase'
+        userId: string (Optional)
+        userBookId: string (Optional)
+        status: string (Optional)
+        lat: number (Required only if searching meeting request by distance)
+        lon: number (Required only if searching meeting request by distance)
+        distance: number (Required only if searching meeting agreement by distance)
+        hasPassed: boolean (Optional for querying meeting agreement by whether meeting date has passed or borrow agreement by whether return date has passed) //Possible values: 'true', 'false'
+
+Output:
+    {
+        data: {
+            meetingAgreement (if type is 'meeting', otherwise undefined): [{
+                id: string
+                userBookId: string
+                userId: string
+                status: string
+                createdOn: Date
+                updatedOn: Date
+                requests: any[]
+                geolocation: [number, number] //Format: [longitud, latitude]
+                place: string
+                meetingDate: Date
+            }],
+            purchaseAgreement (if type is 'purchase', otherwise undefined): [{
+                id: string
+                userBookId: string
+                userId: string
+                status: string
+                createdOn: Date
+                updatedOn: Date
+                requests: any[]
+                price: number
+            }],
+            borrowAgreement (if type is 'borrow', otherwise undefined): [{
+                id: string
+                userBookId: string
+                userId: string
+                status: string
+                createdOn: Date
+                updatedOn: Date
+                requests: any[]
+                returnDate: Date
+            }]
+        }
+    }
+*/
 agreementsRouter.get('/search', async (req: Request, res: Response) => {
     try{
         let type: string = req.query.type as string
@@ -37,7 +89,9 @@ agreementsRouter.get('/search', async (req: Request, res: Response) => {
 
             const meetingAgreements: MeetingAgreement[] = await agreementsController.searchMeetingAgreements(userId, userBookId, status, distance, geolocation, hasPassed, page, limit)
             res.json({
-                data: meetingAgreements
+                data: {
+                    meetingAgreements
+                }
             })
         } else if(type == 'borrow'){
             let userId: string | undefined = req.query.userId as string
@@ -47,7 +101,9 @@ agreementsRouter.get('/search', async (req: Request, res: Response) => {
 
             const borrowAgreement: BorrowAgreement[] = await agreementsController.searchBorrowAgreements(userId, userBookId, status, hasPassed, page, limit)
             res.json({
-                data: borrowAgreement
+                data: {
+                    borrowAgreement
+                }
             })
         } else if(type == 'purchase'){
             let userId: string | undefined = req.query.userId as string
@@ -56,7 +112,9 @@ agreementsRouter.get('/search', async (req: Request, res: Response) => {
 
             const purchaseAgreement: PurchaseAgreement[] = await agreementsController.searchPurchaseAgreements(userId, userBookId, status, page, limit)
             res.json({
-                data: purchaseAgreement
+                data: {
+                    purchaseAgreement
+                }
             })
         } else {
             res.status(400).json({
@@ -71,6 +129,45 @@ agreementsRouter.get('/search', async (req: Request, res: Response) => {
     }
 })
 
+/*
+Add a request to existing agreements. If the agreementId is not provided, a new agreement will be created and the request added. Can handle one agreement of each type simultaneously in one API call.
+
+Input: 
+    Body: {
+        meetingAgreement(Optional): {
+                agreementId: string (Required ONLY IF ADDING A REQUEST TO EXISTING AGREEMENT. IF NOT INCLUDED, A NEW AGREEMENT WILL BE CREATED)
+                userBookId: string
+                userId: string
+                status: string
+                lat: number
+                lon: number
+                place: string
+                meetingDate: Date
+        },
+        borrowAgreement(Optional): {
+                agreementId: string (Required ONLY IF ADDING A REQUEST TO EXISTING AGREEMENT. IF NOT INCLUDED, A NEW AGREEMENT WILL BE CREATED)
+                userBookId: string
+                userId: string
+                status: string
+                returnDate: Date
+        },
+        purchaseAgreement(Optional): {
+                agreementId: string (Required ONLY IF ADDING A REQUEST TO EXISTING AGREEMENT. IF NOT INCLUDED, A NEW AGREEMENT WILL BE CREATED)
+                userBookId: string
+                userId: string
+                status: string
+                price: number
+        }
+    }
+
+Output:
+    {
+        success: boolean
+        meetingAgreementId: string (If meeting agreement was part of input. Otherwise undefined),
+        purchaseAgreementId: string (If purchase agreement was part of input. Otherwise undefined),
+        borrowAgreementId: string (If borrow agreement was part of input. Otherwise undefined)
+    }
+*/
 agreementsRouter.post('/agreement-request', async (req: Request, res: Response) => {
     try{
         let mId: string | undefined
@@ -119,7 +216,7 @@ agreementsRouter.post('/agreement-request', async (req: Request, res: Response) 
             res.status(201).json({
                 success: true,
                 meetingAgreementId: mId,
-                purchasAgreementId: pId,
+                purchaseAgreementId: pId,
                 borrowAgreementId: bId
             })
         }
@@ -131,6 +228,23 @@ agreementsRouter.post('/agreement-request', async (req: Request, res: Response) 
     }
 })
 
+/*
+Accept the final request of each agreement id.
+
+Input:
+    Body: {
+        meetingAgreementId: string
+        borrowAgreementId: string
+        purchaseAgreementId: string
+    }
+Output:
+    {
+        success: true,
+        meetingAgreement: mSuccess,
+        purchaseAgreement: pSuccess,
+        borrowAgreement: bSuccess
+    }
+*/
 agreementsRouter.put('/accept-agreement', async (req: Request, res: Response) => {
     try{
         let mSuccess: boolean = false
@@ -161,9 +275,9 @@ agreementsRouter.put('/accept-agreement', async (req: Request, res: Response) =>
         } else {
             res.status(201).json({
                 success: true,
-                meetingAgreementId: mId,
-                purchasAgreementId: pId,
-                borrowAgreementId: bId
+                meetingAgreement: mSuccess,
+                purchaseAgreement: pSuccess,
+                borrowAgreement: bSuccess
             })
         }
 
@@ -174,6 +288,52 @@ agreementsRouter.put('/accept-agreement', async (req: Request, res: Response) =>
     }
 })
 
+/*
+Get agreement by id
+
+Input:
+    URL path:
+        type: string //Possible values: 'meeting-agreement', 'purchase-agreement', 'borrow-agreement'
+        id: string (agreementId)
+
+Output: 
+{
+    data: {
+        meetingAgreement (if type is 'meeting', otherwise undefined): {
+            id: string
+            userBookId: string
+            userId: string
+            status: string
+            createdOn: Date
+            updatedOn: Date
+            requests: any[]
+            geolocation: [number, number] //Format: [longitud, latitude]
+            place: string
+            meetingDate: Date
+        },
+        purchaseAgreement (if type is 'purchase', otherwise undefined): {
+            id: string
+            userBookId: string
+            userId: string
+            status: string
+            createdOn: Date
+            updatedOn: Date
+            requests: any[]
+            price: number
+        },
+        borrowAgreement (if type is 'borrow', otherwise undefined): {
+            id: string
+            userBookId: string
+            userId: string
+            status: string
+            createdOn: Date
+            updatedOn: Date
+            requests: any[]
+            returnDate: Date
+        }
+    }
+}
+*/
 agreementsRouter.get('/:type/:id', async (req: Request, res: Response) => {
     try{
         let agreementId: string = req.params.id
@@ -184,19 +344,25 @@ agreementsRouter.get('/:type/:id', async (req: Request, res: Response) => {
             case 'meeting-agreement':
                 result = await agreementsController.getMeetingAgreementById(agreementId)
                 res.json({
-                    data: result
+                    data: {
+                        meetingAgreement: result
+                    }
                 })
                 break
             case 'purchase-agreement':
                 result = await agreementsController.getPurchaseAgreementById(agreementId)
                 res.json({
-                    data: result
+                    data: {
+                        purchaseAgreement: result
+                    }
                 })
                 break
             case 'borrow-agreement':
                 result = await agreementsController.getBorrowAgreementById(agreementId)
                 res.json({
-                    data: result
+                    data: {
+                        borrowAgreement: result
+                    }
                 })
                 break
             default:
