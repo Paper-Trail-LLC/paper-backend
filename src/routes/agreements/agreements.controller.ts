@@ -96,7 +96,7 @@ export class AgreementsController {
             ${userBookId? 'and user_book_id = uuid_to_bin(?) ':''}
             ${status? 'and status = ? ':''}
             ${hasPassed != undefined? `and meeting_date ${hasPassed? '<':'>'} now() `:''}
-            ${distance != undefined && geolocation? 'and ST_Distance(Point(?, ?), geolocation) <= ? ':''}
+            ${distance != undefined && geolocation? `and ST_Distance(ST_GeomFromText('Point(? ?)', 4326), geolocation, 'metre') <= ? `:''}
             limit ? 
             offset ?;`
 
@@ -496,7 +496,7 @@ export class AgreementsController {
 
                 let finalRequest = agreement.requests[agreement.requests.length-1]
 
-                const query = `update meeting_agreement set geolocation = ST_GeomFromText('Point(? ?)'), place = ?, meeting_date = ? where agreement_id = ?`
+                const query = `update meeting_agreement set geolocation = ST_GeomFromText('Point(? ?)', 4326), place = ?, meeting_date = ? where agreement_id = ?`
         
                 myPool.query({
                     sql: query,

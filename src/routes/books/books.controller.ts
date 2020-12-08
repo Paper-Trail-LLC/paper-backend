@@ -95,7 +95,7 @@ export class BooksController {
             let p: Pool | PoolConnection = connection ? connection:myPool
             let insertBookQuery = `set @bookId = uuid_to_bin(uuid()); 
             insert into book (id, title, isbn13, release_date, edition, image_url, isbn, synopsys) values(@bookId, ?, ?, ?, ?, ?, ?, ?); 
-            select @bookId;`
+            select bin_to_uuid(@bookId) as full_bookId;`
             p.query({
                 sql: insertBookQuery,
                 values: [book.title, book.isbn13, new Date(book.releaseDate), book.edition, book.coverURI, book.isbn, book.synopsis]
@@ -103,7 +103,7 @@ export class BooksController {
                 if(error){
                     reject(error)
                 } else {
-                    resolve(results[2][0]['@bookId'])
+                    resolve(results[2][0]['full_bookId'])
                 }
             })
         })
@@ -112,7 +112,7 @@ export class BooksController {
     public async addAuthorToBook(authorId: string, bookId: string, connection?: PoolConnection): Promise<boolean> {
         return new Promise((resolve, reject) => {
             let p: Pool | PoolConnection = connection ? connection:myPool
-            let addBookAuthorQuery = `insert into book_author (book_id, author_id) values (?, ?)`
+            let addBookAuthorQuery = `insert into book_author (book_id, author_id) values (uuid_to_bin(?), uuid_to_bin(?))`
             p.query({
                 sql: addBookAuthorQuery,
                 values: [bookId, authorId]
@@ -131,7 +131,7 @@ export class BooksController {
             let p: Pool | PoolConnection = connection ? connection:myPool
             let addBookAuthorQuery = `set @id = uuid_to_bin(uuid()); 
             insert into author (id, name) values (@id, ?); 
-            select @id;`
+            select bin_to_uuid(@id) as full_id;`
             p.query({
                 sql: addBookAuthorQuery,
                 values: [name]
@@ -139,7 +139,7 @@ export class BooksController {
                 if(error){
                     reject(error)
                 } else {
-                    resolve(results[2][0]['@id'])
+                    resolve(results[2][0]['full_id'])
                 }
             })
         })
