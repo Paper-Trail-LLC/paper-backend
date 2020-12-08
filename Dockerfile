@@ -42,4 +42,4 @@ RUN chown -R node:node /usr/src/app
 USER node
 
 # EXPOSE 8081
-CMD yarn watch-node
+CMD yarn start

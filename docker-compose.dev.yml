@@ -12,6 +12,7 @@ services:
             - "3306:3306"
         volumes:
             - ./utils/00_paperTrailDBInit.sql:/docker-entrypoint-initdb.d/AppDatabase.sql
+            - ./utils/01_roles_init.sql:/docker-entrypoint-initdb.d/AppDatabase2.sql
 
     web:
         build:
@@ -24,9 +25,13 @@ services:
             - ./webpack.config.ts:/code/webpack.config.ts
             - ./src:/code/src
         environment:
-            - NODE_ENV=heroku
+            - NODE_ENV=development
             - PORT=8081
             - db_database=papertrail_dev
-            - db_host=paper-trail-development.chesfvlhtyt3.ca-central-1.rds.amazonaws.com
-            - db_passwrod=S3cr3tpa$$word
-            - db_user=admin
+            - db_host=mysql
+            - db_password=secretpassword
+            - db_user=dev_user
+            # - db_database=papertrail_dev
+            # - db_host=paper-trail-development.chesfvlhtyt3.ca-central-1.rds.amazonaws.com
+            # - db_passwrod=S3cr3tpa$$word
+            # - db_user=admin

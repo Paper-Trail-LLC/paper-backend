@@ -13,9 +13,8 @@ if (!process.env.NODE_ENV) {
 };
 console.log(`Running with env: ${process.env.NODE_ENV}`);
 dotenv.config({
-  path: `./env/${process.env.NODE_ENV}.env`,
+  path: `./env/${process.env.NODE_ENV}.env`
 });
-
 /**
  * App Variables
  */

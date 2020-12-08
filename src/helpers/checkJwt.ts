@@ -6,7 +6,6 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
     const token = <string>req.headers["auth"];
     const jwtSecret = <string>process.env.jwtSecret
     let jwtPayload;
-
     // Try to validate the token and get data
     try {
         // Create model to eliminate 'any'
@@ -20,8 +19,8 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 
     //The token is valid for 1 hour
     //We want to send a new token on every request
-    const { userId, email } = jwtPayload;
-    const newToken = jwt.sign({ userId, email }, jwtSecret, {
+    const { userId, email, firstname, lastname } = jwtPayload;
+    const newToken = jwt.sign({ userId, email, firstname, lastname }, jwtSecret, {
         expiresIn: "1h"
     });
     res.setHeader("token", newToken);

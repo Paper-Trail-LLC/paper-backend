@@ -23,13 +23,15 @@ CREATE TABLE `user` (
   `lastname` varchar(60) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `gender` varchar(45) DEFAULT NULL,
-  `hash` varchar(45) NOT NULL,
-  `salt` varchar(45) NOT NULL,
+  `hash` varchar(512) NOT NULL,
+  `salt` varchar(512) NOT NULL,
   `geolocation` point NOT NULL,
   `created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-);
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email_UNIQUE` (`email`)
+)
+
 
 -- Author -----------------------------------------------------------
 DROP TABLE IF EXISTS `author`;
@@ -44,10 +46,12 @@ DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role` (
   `id` varbinary(16) NOT NULL,
   `name` varchar(45) NOT NULL,
-  `permissions` json NOT NULL,
+  `description` varchar(256) NOT NULL,
+  `created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
 );
+
 
 -- User Role --------------------------------------------------------
 DROP TABLE IF EXISTS `user_role`;

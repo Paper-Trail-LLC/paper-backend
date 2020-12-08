@@ -1,5 +1,0 @@
-version: "3.8"
-services:
-    mysql:
-        volumes:
-            - ./utils/01_dbPopulate.sql:/docker-entrypoint-initdb.d/TestData.sql

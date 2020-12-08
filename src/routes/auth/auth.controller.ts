@@ -20,8 +20,12 @@ export class AuthController {
         let user: User;
         try {
             // Fail if no user?
+            console.log(email);
             user = await userController.getUserByEmail(email);
-
+            console.table(user);
+            user = new User(user.firstname, user.lastname, user.email, user.hash, user.created_on, user.updated_on, user.roles, undefined, user.gender,
+                undefined, user.id, user.salt);
+            console.table(user);
             //Check if encrypted password match
             if (!user.checkIfUnencryptedPasswordIsValid(password)) {
                 res.status(401).send();
@@ -30,7 +34,7 @@ export class AuthController {
 
             //Sing JWT, valid for 1 hour
             const token = jwt.sign(
-                { userId: user.id, email: user.email },
+                { userId: user.id, email: user.email, firstname: user.firstname, lastname: user.lastname },
                 <string>process.env.jwtSecret,
                 { expiresIn: "1h" }
             );
@@ -38,6 +42,7 @@ export class AuthController {
             //Send the jwt in the response
             res.send(token);
         } catch (error) {
+            console.log(error);
             res.status(401).send();
         }
 
@@ -57,8 +62,9 @@ export class AuthController {
         let user: User;
         try {
             // Fail if no user?
-            user = await userController.getUserById(userId);
-
+            user = await userController.getUserById(userId, true);
+            user = new User(user.firstname, user.lastname, user.email, user.hash, user.created_on, user.updated_on, user.roles, undefined, user.gender,
+                undefined, user.id, user.salt);
             //Check if old password matchs
             if (!user.checkIfUnencryptedPasswordIsValid(oldPassword)) {
                 res.status(401).send();
@@ -67,11 +73,12 @@ export class AuthController {
 
             //Validate de model (password lenght)
             user.hash = newPassword;
-            const errors = await validate(user);
-            if (errors.length > 0) {
-                res.status(400).send(errors);
-                return;
-            }
+            // TODO: Actually require a password style (minlength, uppercases, etc)
+            // const errors = await validate(user);
+            // if (errors.length > 0) {
+            //     res.status(400).send(errors);
+            //     return;
+            // }
             //Hash the new password and save
             user.hashPassword();
             userController.updatePassword(user);

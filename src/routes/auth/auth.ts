@@ -14,6 +14,6 @@ const authController: AuthController = new AuthController()
 /**
  * Login route
  */
-authRouter.post('/login', authController.login);
+authRouter.post('/login', AuthController.login);
 
-authRouter.post('/change-password', [checkJwt], authController.changePassword);
+authRouter.post('/change-password', [checkJwt], AuthController.changePassword);

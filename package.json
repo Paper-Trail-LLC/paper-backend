@@ -9,13 +9,13 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "start": "node dist/index",
+    "start": "node ./index.js",
     "webpack": "webpack serve --config webpack.dev.js",
-    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript, Node\" -c \"yello.bold, cyan.bold\" \"yarn webpack\" \"yarn run start\"",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript, Node\" -c \"yello.bold, cyan.bold\" \"yarn run watch-ts\" \"yarn run watch-node\"",
     "build": "webpack --config webpack.prod.js",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
-    "watch-node": "node ./index.js",
+    "watch-node": "nodemon ./dist/index.js",
     "test": "jest"
   },
   "_moduleAliases": {
