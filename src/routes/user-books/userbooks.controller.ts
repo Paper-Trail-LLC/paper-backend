@@ -21,13 +21,13 @@ export class UserBooksController {
 
         return new Promise<UserBook[]>((resolve, reject) => {
             let query =
-                `select * from user_book 
+                `select *, bin_to_uuid(id) as full_id, bin_to_uuid(user_id) as full_user_id, bin_to_uuid(book_id) as full_book_id from user_book 
             inner join book on user_book.book_id=book.id 
             ${params ? 'where' : ''} ${isbn ? (isbn.length === 13 ? `isbn13 = ? ` : `isbn = ? `) : 'true '} 
             ${status ? `and status = ? ` : ``}
             ${lending != undefined ? `and lending = ? ` : ``}
             ${selling != undefined ? `and selling = ? ` : ``}
-            ${geolocation && distance != undefined ? `and ST_Distance(Point(?, ?), geolocation) <= ? ` : ``}
+            ${geolocation && distance != undefined ? `and ST_Distance(ST_GeomFromText('Point(? ?)', 4326), geolocation, 'metre') <= ? ` : ``}
             limit ? 
             offset ?; 
             select name from author 
@@ -61,9 +61,9 @@ export class UserBooksController {
                     })
                     const userBooks: UserBook[] = results[0].map<UserBook>((value): UserBook => {
                         return new UserBook(
-                            value['id'],
-                            value['user_id'],
-                            value['book_id'],
+                            value['full_id'],
+                            value['full_user_id'],
+                            value['full_book_id'],
                             value['title'],
                             authors, //List of authors
                             value['isbn'],
@@ -85,9 +85,9 @@ export class UserBooksController {
 
     public async getLibraryOfUser(userId: string, limit: number = 25, page: number = 1): Promise<UserBook[]> {
         return new Promise<UserBook[]>((resolve, reject) => {
-            let query = `select * from user_book 
+            let query = `select *, bin_to_uuid(id) as full_id, bin_to_uuid(user_id) as full_user_id, bin_to_uuid(book_id) as full_book_id from user_book 
             inner join book on user_book.book_id=book.id 
-            where user_book.user_id = ? 
+            where user_book.user_id = uuid_to_bin(?) 
             limit ? 
             offset ?; 
             select name from author 
@@ -105,9 +105,9 @@ export class UserBooksController {
                     })
                     const userBooks: UserBook[] = results[0].map<UserBook>((value): UserBook => {
                         return new UserBook(
-                            value['id'],
-                            value['user_id'],
-                            value['book_id'],
+                            value['full_id'],
+                            value['full_user_id'],
+                            value['full_book_id'],
                             value['title'],
                             authors, //List of authors
                             value['isbn'],
@@ -136,7 +136,7 @@ export class UserBooksController {
 
         const bookController = new BooksController()
         return new Promise<any>((resolve, reject) => { //Gets book from DB, if present. Otherwise, gets book from external API.
-            let getBookQuery = `select * from book where isbn13 = ? and id not in (select book_id from custom_book);`
+            let getBookQuery = `select *, bin_to_uuid(id) as full_id from book where isbn13 = ? and id not in (select book_id from custom_book);`
             myPool.query({
                 sql: getBookQuery,
                 values: [isbn13]
@@ -160,7 +160,7 @@ export class UserBooksController {
                             })
                     } else {
                         resolve({
-                            bookId: results[0]['id'],
+                            bookId: results[0]['full_id'],
                             newEntry: false
                         })
                     }
@@ -215,8 +215,8 @@ export class UserBooksController {
 
             return new Promise<any>((resolve, reject) => {
                 let insertUserBookQuery = `set @userBookId = uuid_to_bin(uuid()); 
-                insert into user_book (id, user_id, book_id, status, lending, selling, geolocation) values(@userBookId, ?, ?, ?, ?, ?, ST_GeomFromText('Point(? ?)')); 
-                select @userBookId;`
+                insert into user_book (id, user_id, book_id, status, lending, selling, geolocation) values(@userBookId, uuid_to_bin(?), uuid_to_bin(?), ?, ?, ?, ST_GeomFromText('Point(? ?)', 4326)); 
+                select bin_to_uuid(@userBookId) as full_userBookId;`
                 connection.query({
                     sql: insertUserBookQuery,
                     values: [userId, bookId, status, lending, selling, geolocation[0], geolocation[1]]
@@ -232,7 +232,7 @@ export class UserBooksController {
                                     reject(error)
                                 })
                             } else {
-                                resolve(results[2][0]['@userBookId'])
+                                resolve(results[2][0]['full_userBookId'])
                             }
                         })
                     }
@@ -246,7 +246,7 @@ export class UserBooksController {
             const STATUS = 'Deleted';
             const query = `UPDATE user_book
             SET status = ?
-            WHERE id = ?; `
+            WHERE id = uuid_to_bin(?); `
 
             myPool.query({
                 sql: query,
@@ -292,7 +292,7 @@ export class UserBooksController {
                 }
 
                 return new Promise<any>((resolve, reject) => {
-                    let customBookQuery = `insert into custom_book (book_id, user_id) values (?, ?);`
+                    let customBookQuery = `insert into custom_book (book_id, user_id) values (uuid_to_bin(?), uuid_to_bin(?));`
                     connection.query({
                         sql: customBookQuery,
                         values: [bookId, userId]
@@ -322,8 +322,8 @@ export class UserBooksController {
             let bookId: string = value.bookId
             return new Promise<any>((resolve, reject) => {
                 let insertUserBookQuery = `set @userBookId = uuid_to_bin(uuid()); 
-                insert into user_book (id, user_id, book_id, status, lending, selling, geolocation) values(@userBookId, ?, ?, ?, ?, ?, ST_GeomFromText('Point(? ?)')); 
-                select @userBookId;`
+                insert into user_book (id, user_id, book_id, status, lending, selling, geolocation) values(@userBookId, uuid_to_bin(?), uuid_to_bin(?), ?, ?, ?, ST_GeomFromText('Point(? ?)', 4326)); 
+                select bin_to_uuid(@userBookId) as full_userBookId;`
                 connection.query({
                     sql: insertUserBookQuery,
                     values: [userId, bookId, status, lending, selling, geolocation[0], geolocation[1]]
@@ -339,7 +339,7 @@ export class UserBooksController {
                                     reject(error)
                                 })
                             } else {
-                                resolve(results[2][0]['@userBookId'])
+                                resolve(results[2][0]['full_userBookId'])
                             }
                         })
                     }

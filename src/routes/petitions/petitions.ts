@@ -121,7 +121,7 @@ petitionsRouter.get('/search', async (req: Request, res: Response): Promise<void
         const currentLat: number | undefined = +(req.query.currentLat as string) || undefined
         const currentLon: number | undefined = +(req.query.currentLon as string) || undefined
         const searchRadius: number | undefined = +(req.query.searchRadius as string) || undefined
-        const expired: boolean = (req.query.expired as string) === 'true'? true : false
+        const expired: boolean | undefined = (req.query.expired as string) === 'true'? true : (req.query.expired as string) === 'false'? false : undefined
 
         let currentLocation: [number, number] | undefined = undefined 
         if(currentLat && currentLon){

@@ -5,16 +5,17 @@ import { PoolConnection } from "mysql";
 
 export class PetitionsController {
 
-    public async searchPetitions(expired: boolean, isbn?: string, status?: string, lending?: number, selling?: number, currentLocation?: [number, number], searchRadius?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
+    public async searchPetitions(expired?: boolean, isbn?: string, status?: string, lending?: number, selling?: number, currentLocation?: [number, number], searchRadius?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
         return new Promise<BookPetition[]>((resolve, reject) => {
             const query = `select *, bin_to_uuid(book_petition.id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id 
             from book_petition inner join book on book_petition.book_id = book.id 
-            where expiration_date ${expired? '<':'>'} now() 
+            where true 
+            ${expired != undefined? `and expiration_date ${expired? '<':'>'} now()`: ''} 
             ${isbn? 'and (isbn = ? or isbn13 = ?) ':''}
             ${status? 'and status = ? ':''}
             ${lending != undefined? 'and lending = ? ':''}
             ${selling != undefined? 'and selling = ? ':''}
-            ${currentLocation? 'and ST_Distance(Point(?, ?), geolocation) <= ? and (location_radius is null or ST_Distance(Point(?, ?), geolocation) <= location_radius) ':''}
+            ${currentLocation? `and ST_Distance(ST_GeomFromText('Point(? ?)', 4326), geolocation, 'metre') <= ? and (location_radius is null or ST_Distance(ST_GeomFromText('Point(? ?)', 4326), geolocation, 'metre') <= location_radius) `:''}
             limit ? 
             offset ?;`
 
@@ -64,7 +65,7 @@ export class PetitionsController {
     public async getPetitionById(petitionId: string): Promise<BookPetition> {
         return new Promise<BookPetition>((resolve, reject) => {
             const query = `select *, bin_to_uuid(id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id from book_petition 
-            where id = ?;`
+            where id = uuid_to_bin(?);`
 
             myPool.query({
                 sql: query,
@@ -97,7 +98,7 @@ export class PetitionsController {
     public async getPetitionsByUser(userId: string, expired: boolean, status?: string, lending?: number, selling?: number, page: number = 1, limit: number = 25): Promise<BookPetition[]> {
         return new Promise<BookPetition[]>((resolve, reject) => {
             const query = `select *, bin_to_uuid(id) as full_id, bin_to_uuid(book_id) as full_book_id, bin_to_uuid(user_id) as full_user_id from book_petition 
-            where user_id = ? 
+            where user_id = uuid_to_bin(?) 
             and expiration_date ${expired? '<':'>'} now() 
             ${status? 'and status = ? ':''}
             ${lending != undefined? 'and lending = ? ':''}
@@ -180,7 +181,7 @@ export class PetitionsController {
                     return new Promise<string>((resolve, reject) => {
                         let query = `set @petitionId = uuid_to_bin(uuid()); 
                         insert into book_petition (id, user_id, book_id, status, description, lending, selling, geolocation, location_radius, expiration_date) 
-                        values (@petitionId, uuid_to_bin(?), uuid_to_bin(?), ?, ?, ?, ?, ST_GeomFromText('Point(? ?)'), ?, ?); 
+                        values (@petitionId, uuid_to_bin(?), uuid_to_bin(?), ?, ?, ?, ?, ST_GeomFromText('Point(? ?)', 4326), ?, ?); 
                         select bin_to_uuid(@petitionId) as petitionId;`
             
                         connection.query({
@@ -226,7 +227,7 @@ export class PetitionsController {
             ${description? 'description = ? ':''}
             ${lending != undefined? 'lending = ? ':''}
             ${selling != undefined? 'selling = ? ':''}
-            ${geolocation? `geolocation = ST_GeomFromText('Point(? ?)') `:''}
+            ${geolocation? `geolocation = ST_GeomFromText('Point(? ?)', 4326) `:''}
             ${locationRadius? 'location_radius = ? ':''}
             ${expirationDate? 'expiration_date = ? ':''}
             where id = ?;`
