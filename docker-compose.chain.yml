@@ -24,19 +24,19 @@ services:
             - "8081:8081"
         volumes:
             - ./package.json:/code/package.json
-            - ./webpack.config.ts:/code/webpack.config.ts
+            # - ./webpack.config.ts:/code/webpack.config.ts
             - ./src:/code/src
         environment:
             - NODE_ENV=development
             - PORT=8081
-            - db_database=papertrail_dev
-            - db_host=mysql
-            - db_password=secretpassword
-            - db_user=dev_user
             # - db_database=papertrail_dev
-            # - db_host=paper-trail-development.chesfvlhtyt3.ca-central-1.rds.amazonaws.com
-            # - db_passwrod=S3cr3tpa$$word
-            # - db_user=admin
+            # - db_host=mysql
+            # - db_password=secretpassword
+            # - db_user=dev_user
+            - db_database=papertrail_dev
+            - db_host=paper-trail-development.chesfvlhtyt3.ca-central-1.rds.amazonaws.com
+            - db_password=S3cr3tpa$$word
+            - db_user=dev_user
 
     papertrail-tp-0:
         build:
