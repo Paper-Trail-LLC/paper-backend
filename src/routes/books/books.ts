@@ -61,7 +61,7 @@ Search books by keywords
 Input:
     Query Parameters:
         keywords: string
-        criteria: string (Optional) // Possible values: 'title', 'author'
+        criteria: string (Optional) // Possible values: 'title', 'author', 'genre'
         page: number
         limit: number
 Output:
@@ -95,7 +95,8 @@ booksRouter.get('/search', async (req: Request, res: Response): Promise<void> =>
         }
 
         let books: Book[]
-
+        console.log(criteria);
+        console.log(keywords);
         switch (criteria) {
             case 'title':
                 books = await booksController.searchBooksByTitle(keywords, limit, page)
@@ -103,6 +104,8 @@ booksRouter.get('/search', async (req: Request, res: Response): Promise<void> =>
             case 'author':
                 books = await booksController.searchBooksByAuthor(keywords, limit, page)
                 break
+            case 'genre':
+                books = await booksController.searchBooksByGenre(keywords, limit, page)
             default:
                 books = await booksController.searchBooks(keywords, limit, page)
                 break

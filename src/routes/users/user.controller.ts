@@ -25,6 +25,32 @@ export class UserController {
         })
     };
 
+
+    /**
+     *
+     *
+     * @param {string} userId
+     * @returns {Promise<any>}
+     * @memberof UserController
+     */
+    public async getMyUserInfo(userId: string): Promise<any> {
+        return new Promise<User>((resolve, reject) => {
+            // TODO: Eliminate password from response
+            const query = `SELECT BIN_TO_UUID(user.id) AS id, firstname, lastname, email, gender, created_on, updated_on
+            WHERE user.id = UUID_TO_BIN(?);`
+            myPool.query({
+                sql: query,
+                values: [userId]
+            }, (error, result: User) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    }
+
     /**
      *
      *
@@ -67,13 +93,15 @@ export class UserController {
     public async createUser(user: User): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             // TODO: Eliminate password from response
-            const query = `SET @userId = uuid();
+            const query = `START TRANSACTION;
+            SET @userId = uuid();
             SET @g = ST_GeomFromText(?);
             INSERT INTO user(id, firstname, lastname, email, gender, hash, salt, geolocation)  
             VALUES(uuid_to_bin(@userId), ?, ?, ?, ?, ?, ?, @g);
             INSERT INTO user_role(user_id, role_id, assigned_by)
             VALUES(uuid_to_bin(@userId), (SELECT id FROM role WHERE name=?),uuid_to_bin(@userId)); 
-            SELECT @userId;`
+            SELECT @userId;
+            COMMIT;`
             myPool.query({
                 sql: query,
                 values: [`POINT(${user.geolocation[0]} ${user.geolocation[1]})`, user.firstname, user.lastname, user.email, user.gender, user.hash, user.salt, user.roles[0].name]
@@ -180,8 +208,8 @@ export class UserController {
             })
         })
     }
-    
-    public async removeUserRole(userId: string, role_name:string): Promise<void> {
+
+    public async removeUserRole(userId: string, role_name: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             const query = `DELETE FROM user_role
             WHERE user_id = ? AND  role_id = (SELECT id FROM role WHERE name=?);`
@@ -198,7 +226,7 @@ export class UserController {
         })
     }
 
-    public async assignUserRole(userId: string, role_name:string, asignee:string=userId): Promise<void> {
+    public async assignUserRole(userId: string, role_name: string, asignee: string = userId): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             const query = `INSERT INTO user_role(user_id, role_id, assigned_by)
             VALUES(uuid_to_bin(?), (SELECT id FROM role WHERE name=?),uuid_to_bin(?));`
