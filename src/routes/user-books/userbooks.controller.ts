@@ -241,8 +241,8 @@ export class UserBooksController {
         })
     }
 
-    public async deleteLibraryOfUser(user_book_id: string): Promise<UserBook[]> {
-        return new Promise<UserBook[]>((resolve, reject) => {
+    public async deleteLibraryOfUser(user_book_id: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             const STATUS = 'Deleted';
             const query = `UPDATE user_book
             SET status = ?
