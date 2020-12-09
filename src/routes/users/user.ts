@@ -28,6 +28,15 @@ userRouter.get('/', [checkJwt, checkRole(['ADMIN'])], async (req: Request, res: 
         res.status(500).send();
     }
 });
+// Get user by id
+userRouter.get('/me', [checkJwt, checkRole(['MEMBER', 'ADMIN'])], async (req: Request, res: Response): Promise<void> => {
+    try {
+        const user = await userController.getUserById(res.locals.jwtPayload.userId);
+        res.send(user);
+    } catch (err) {
+        res.status(404).send("User not found");
+    }
+});
 
 // Get user by id
 userRouter.get('/:id', [checkJwt, checkRole(['ADMIN'])], async (req: Request, res: Response): Promise<void> => {
@@ -50,7 +59,7 @@ userRouter.get('/:id', [checkJwt, checkRole(['ADMIN'])], async (req: Request, re
 // Create new user [checkJwt, checkRole(['ADMIN'])],
 userRouter.post('/register', async (req: Request, res: Response): Promise<void> => {
     //Get parameters from the body
-    let { firstname, lastname, email, gender, hash, phone, address } = req.body;
+    let { firstname, lastname, email, gender, hash, phone } = req.body;
     //Validade if the parameters are ok
     if (!firstname || !lastname || !email || !hash || !phone) {
         res.status(400).json({
@@ -183,7 +192,7 @@ userRouter.post('/role/:id', [checkJwt, checkRole(['ADMIN'])], async (req: Reque
     let roles: Array<Role>;
     try {
         roles = await userController.getUserRoles(id);
-        if (roles.map((r)=> {return r.name}).indexOf(role_name) > -1) {
+        if (roles.map((r) => { return r.name }).indexOf(role_name) > -1) {
             res.status(409).send("Couldn't assign role.");
             return;
         }

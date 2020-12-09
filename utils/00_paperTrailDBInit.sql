@@ -30,7 +30,7 @@ CREATE TABLE `user` (
   `updated_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-)
+);
 
 
 -- Author -----------------------------------------------------------

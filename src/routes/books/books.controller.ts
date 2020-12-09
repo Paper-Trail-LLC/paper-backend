@@ -24,6 +24,31 @@ export class BooksController {
             throw new Error(error.message)
         }
     }
+    public async searchBooksByGenre(subject: string, limit:number= 25, page: number = 0): Promise<Book[]> {
+        try{
+            //TODO First search in local DB
+
+            //If not found, search in external api
+            const response: any = await ExternalAPI.get(`/subject/${subject}`, {
+                params: {
+                    page: page,
+                    pageSize: limit
+                }
+            });
+            const books: any[] = response.data.books
+            const result: Book[] = books.map<Book>((book: any): Book =>{
+                let authors: string[] = book.authors
+                return new Book(book.title, authors.filter(a => a), book.isbn, book.isbn13, book.date_published, book.edition, book.image, undefined, book.synopsys)
+            })
+            return result
+        } catch(error) {
+            if(error.response.status == 404){
+                return []
+            }
+            throw new Error(error.message)
+        }
+
+    }
     public async searchBooks(keywords: string, limit: number = 25, page: number = 0): Promise<Book[]> {
         try {
             const response: any = await ExternalAPI.get('/books/'+encodeURIComponent(keywords), {
