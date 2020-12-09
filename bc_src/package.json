@@ -1,0 +1,15 @@
+{
+  "name": "paper-blockchain",
+  "version": "1.0.0",
+  "description": "Blockchain network for Paper Trail system",
+  "main": "index.js",
+  "author": "Eduardo O'Neill",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cbor": "^5.1.0",
+    "sawtooth-sdk": "^1.0.5"
+  }
+}
